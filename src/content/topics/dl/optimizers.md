@@ -136,11 +136,17 @@ where $t$ is the current step and $T$ the total number of steps: it starts at $\
 ## 8. Code
 
 ```python
-import torch
+import math, torch
 opt = torch.optim.AdamW(model.parameters(), lr=3e-4, weight_decay=0.01)
 total, warm = 10_000, 500
-sched = torch.optim.lr_scheduler.LambdaLR(
-    opt, lambda s: (s + 1) / warm if s < warm else 0.5 * (1 + torch.cos(torch.tensor(3.1416 * (s - warm) / (total - warm)))).item())
+
+def lr_factor(step):                      # multiplies the base learning rate
+    if step < warm:
+        return (step + 1) / warm          # linear warmup
+    progress = (step - warm) / (total - warm)
+    return 0.5 * (1 + math.cos(math.pi * progress))   # cosine decay to 0
+
+sched = torch.optim.lr_scheduler.LambdaLR(opt, lr_factor)
 
 for step, (xb, yb) in enumerate(loader):
     opt.zero_grad()
