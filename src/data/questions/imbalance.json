@@ -1,0 +1,42 @@
+[
+ {
+  "q": "How do you handle class imbalance?",
+  "a": "<p>Four levels: (1) right metric: PR-AUC, recall at fixed precision, F1, precision@k, cost; (2) algorithm: class weights, scale_pos_weight, focal loss; (3) data: undersampling, oversampling, SMOTE, inside training folds only; (4) decision: threshold tuning with business costs. Plus stratified splits and calibration if probabilities are used.</p>"
+ },
+ {
+  "q": "When should SMOTE be applied?",
+  "a": "<p>Only to the training data, after splitting, inside each CV fold (imblearn Pipeline). Applying it before the split puts synthetic neighbours of test points into training, inflating scores. Never resample validation or test.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Class weights vs SMOTE: which do you prefer?",
+  "a": "<p>Class weights first: no synthetic data, no distortion of feature distributions, works with any loss-based model. SMOTE can help when the minority class is tiny or the learner is weak, but creates unrealistic points with categorical or high-dimensional data. Often a good boosted model plus threshold tuning beats both.</p>"
+ },
+ {
+  "q": "Why can ROC-AUC look good on imbalanced data when the model is weak?",
+  "a": "<p>FPR divides by all negatives. With 100,000 negatives, 1,000 false positives is only 1% FPR, so the ROC curve looks excellent. But if there are only 200 positives, precision is terrible. The PR curve shows this; its random baseline equals the positive rate (try the prevalence slider in Classification metrics).</p>",
+  "gotcha": true
+ },
+ {
+  "q": "How do you choose the decision threshold?",
+  "a": "<p>On a validation set: maximise F1 or Fβ, hit a required recall or precision, a fixed capacity (top k cases per day), or minimise expected cost. With calibrated probabilities the cost-optimal threshold is \\(C_{FP}/(C_{FP}+C_{FN})\\).</p>"
+ },
+ {
+  "q": "After undersampling to 50:50, your model predicts 40% default probability for a typical customer. Is that real?",
+  "a": "<p>No. Training at 50% prevalence inflates probabilities. Correct with the prior adjustment \\(\\text{odds}_{true} = \\text{odds}_{model}\\times\\frac{\\pi/(1-\\pi)}{\\pi_s/(1-\\pi_s)}\\), or recalibrate on untouched validation data. Ranking (AUC) is unaffected.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "What is focal loss?",
+  "a": "<p>\\(-\\alpha_t(1-p_t)^\\gamma\\log p_t\\). The \\((1-p_t)^\\gamma\\) factor shrinks the loss for easy, well-classified examples so training focuses on hard, misclassified ones. Popular in object detection and deep learning with extreme imbalance.</p>"
+ },
+ {
+  "q": "Should you balance the classes in the test set?",
+  "a": "<p>No. The test set must reflect the real-world class ratio, otherwise precision and every cost estimate are wrong.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Name some SMOTE variants and when to use them.",
+  "a": "<p>Borderline-SMOTE (only near the decision boundary), ADASYN (more samples where minority is harder to learn), SMOTE-NC (mixed categorical features), SMOTE-Tomek / SMOTE-ENN (generate then clean overlapping points).</p>"
+ }
+]

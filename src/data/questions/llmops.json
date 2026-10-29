@@ -1,0 +1,32 @@
+[
+ {
+  "q": "How do you handle PII with an external LLM API?",
+  "a": "<p>Detect PII with NER + regex (e.g. Presidio), mask or pseudonymise before sending, keep the mapping server-side to restore values for authorised users, use providers/regions with no training on your data and limited retention, and log only redacted text.</p>"
+ },
+ {
+  "q": "How do you reduce LLM latency?",
+  "a": "<p>Stream tokens; use smaller models for routing and rewriting; parallelise independent calls and retrievals; cache (exact, semantic, provider prompt caching); trim prompts and retrieved context; cap output tokens; for self-hosting, use vLLM with continuous batching, quantisation and speculative decoding.</p>"
+ },
+ {
+  "q": "How do you reduce cost?",
+  "a": "<p>Route easy requests to cheaper models, cache, shorten prompts and context, limit output length, use batch APIs for offline work, and fine-tune a small model for high-volume narrow tasks. Track cost per request in traces.</p>"
+ },
+ {
+  "q": "What are guardrails?",
+  "a": "<p>Checks around the LLM: input filters (scope, injection, PII), retrieval access control, output validation (schema, groundedness, toxicity, policy, PII leakage) and action controls (allow-listed tools, approvals). Implemented with classifiers, rules and frameworks like NeMo Guardrails or Llama Guard.</p>"
+ },
+ {
+  "q": "What is semantic caching and what's the risk?",
+  "a": "<p>Reuse a stored answer when a new question's embedding is very close to a previous one. Risk: two similar-looking questions may need different answers (different product, date or user permissions), so use a strict threshold and include key metadata in the cache key.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "What do you monitor for an LLM app in production?",
+  "a": "<p>Latency (time to first token, total), tokens and cost, error and timeout rates, tool failures, refusal and \"I don't know\" rates, user feedback, sampled groundedness/quality scores, retrieval hit rates, drift in question types, and model/prompt versions behind each answer.</p>"
+ },
+ {
+  "q": "What is continuous batching in vLLM?",
+  "a": "<p>Instead of waiting for a whole batch to finish, the server adds new requests and removes finished ones at every decoding step, keeping the GPU busy. Combined with PagedAttention (KV cache in pages, like virtual memory) it greatly increases throughput.</p>",
+  "gotcha": true
+ }
+]

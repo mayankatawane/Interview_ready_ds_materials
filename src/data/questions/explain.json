@@ -1,0 +1,23 @@
+[
+ {
+  "q": "What are SHAP values?",
+  "a": "<p>Feature contributions based on Shapley values from game theory: each feature's average marginal contribution to the prediction across all possible orders of adding features. They're additive: baseline + sum of SHAP values = the prediction. TreeSHAP computes them exactly and fast for tree models.</p>"
+ },
+ {
+  "q": "SHAP vs LIME?",
+  "a": "<p>SHAP has a solid theoretical basis (consistency, additivity), gives both local and global views, and is fast for trees. LIME fits a simple local surrogate around one prediction using perturbations; model-agnostic and quick but can be unstable from run to run.</p>"
+ },
+ {
+  "q": "Permutation importance says a feature is unimportant, but domain experts say it matters. Why?",
+  "a": "<p>It's likely correlated with another feature: shuffling one leaves the other carrying the same information, so the score barely drops. Group correlated features and permute them together, or use SHAP, which shares credit between them.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "What is a partial dependence plot?",
+  "a": "<p>The average prediction as one feature is varied across its range while others keep their observed values. Shows the shape of the effect (linear, threshold, U-shape). ICE plots show one line per row to reveal interactions. With correlated features use ALE plots instead, because PDP evaluates impossible combinations.</p>"
+ },
+ {
+  "q": "How do you make a model explainable for regulators?",
+  "a": "<p>Use interpretable models (WOE logistic scorecard) or constrain boosting with monotonic constraints, provide reason codes per decision from SHAP, document features and stability (PSI), test for fairness across groups, and keep a challenger comparison.</p>"
+ }
+]

@@ -1,0 +1,33 @@
+[
+ {
+  "q": "Explain backpropagation in simple terms.",
+  "a": "<p>It's the chain rule applied from the loss backwards through the network. Starting from the output, each layer receives the gradient of the loss with respect to its output, multiplies by its local derivative, and passes the result to the layer before. Reusing these intermediate results makes computing gradients for all weights about as cheap as one or two forward passes. The optimiser then uses the gradients to update the weights.</p>"
+ },
+ {
+  "q": "For a sigmoid output with binary cross-entropy, what is ∂L/∂z?",
+  "a": "<p>\\(p - y\\). The sigmoid derivative \\(p(1-p)\\) cancels with the derivative of the log loss. That clean gradient is one reason BCE pairs so well with a sigmoid output.</p>"
+ },
+ {
+  "q": "Batch vs stochastic vs mini-batch gradient descent?",
+  "a": "<p>Batch GD uses all data per step: exact gradient but slow and memory-hungry. SGD uses one example: cheap, noisy steps. Mini-batch (32–1024) is the standard: GPU-efficient, moderate noise that can help escape saddle points and sharp minima.</p>"
+ },
+ {
+  "q": "What happens if the learning rate is too high or too low?",
+  "a": "<p>Too high: overshoots the minimum, loss oscillates or diverges to NaN. Too low: very slow progress, may stall on plateaus. Use an LR range test, warmup and schedules (cosine, step decay).</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Is the neural network loss convex? Why does training still work?",
+  "a": "<p>No, it's highly non-convex. In high dimensions most critical points are saddle points rather than bad local minima, and many local minima of large networks have similar, good loss. Mini-batch noise and momentum help escape saddles. Over-parameterisation also makes optimisation easier.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "What does loss.backward() do in PyTorch?",
+  "a": "<p>It runs reverse-mode automatic differentiation over the computational graph recorded during the forward pass, computing gradients of the loss with respect to every tensor with <code>requires_grad=True</code> and storing them in <code>.grad</code>. Gradients accumulate, so you call <code>optimizer.zero_grad()</code> each step.</p>"
+ },
+ {
+  "q": "What is gradient accumulation and when would you use it?",
+  "a": "<p>Run several small batches, let gradients add up without stepping, then call <code>optimizer.step()</code> once (dividing the loss by the number of micro-batches). It simulates a large batch when GPU memory only fits a small one.</p>",
+  "gotcha": true
+ }
+]

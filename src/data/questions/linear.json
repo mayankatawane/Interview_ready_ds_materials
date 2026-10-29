@@ -1,0 +1,55 @@
+[
+ {
+  "q": "What are the assumptions of linear regression?",
+  "a": "<p>Linearity in parameters, independent errors, homoscedasticity (constant error variance), normally distributed errors (needed for p-values and confidence intervals, not for the point estimates), and no severe multicollinearity. Check with residual vs fitted plots, Q-Q plot, Durbin-Watson and VIF.</p>"
+ },
+ {
+  "q": "What is the difference between R² and adjusted R²?",
+  "a": "<p>R² = share of variance explained; it never decreases when you add a feature, even a random one (in-sample). Adjusted R² = 1 − (1 − R²)(n − 1)/(n − p − 1) penalises extra features and only rises if the new feature improves the fit more than chance would.</p>"
+ },
+ {
+  "q": "Can R² be negative?",
+  "a": "<p>On training data with an intercept, no. On test data, yes: if the model predicts worse than simply using the mean of y, SS_res &gt; SS_tot and R² &lt; 0. Also possible when fitting without an intercept.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "What happens with multicollinearity, and how do you detect and fix it?",
+  "a": "<p>Coefficients become unstable, with large standard errors and sometimes flipped signs, although predictions may still be fine. Detect with a correlation matrix or VIF (&gt; 5–10). Fix by dropping or combining features, Ridge regression, or PCA.</p>"
+ },
+ {
+  "q": "Is polynomial regression a linear model?",
+  "a": "<p>Yes. \"Linear\" means linear in the <em>parameters</em>, not the features. \\(y = w_0 + w_1x + w_2x^2\\) is still solved with ordinary least squares on the features x and x².</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Why do we minimise squared error rather than absolute error?",
+  "a": "<p>Squared error is smooth and differentiable, gives a closed-form solution, and corresponds to maximum likelihood when errors are Gaussian. It also penalises large errors more. The downside is outlier sensitivity; absolute error (median regression) or Huber loss are more robust.</p>"
+ },
+ {
+  "q": "Normal equation vs gradient descent: when to use which?",
+  "a": "<p>Normal equation \\((X^\\top X)^{-1}X^\\top y\\): exact, no learning rate, but costs \\(O(p^3)\\) for the inverse and needs all data in memory. Fine up to a few thousand features. Gradient descent (or SGD): scales to huge n and p, works with streaming data, needs a learning rate and scaled features.</p>"
+ },
+ {
+  "q": "What if you have more features than rows (p > n)?",
+  "a": "<p>\\(X^\\top X\\) is singular, so OLS has infinitely many solutions and will fit training data perfectly. Use regularisation (Ridge, Lasso, Elastic Net), dimensionality reduction, or feature selection.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "What is the dummy variable trap?",
+  "a": "<p>If you one-hot encode all K levels and include an intercept, the K columns sum to the intercept column: perfect multicollinearity, so \\(X^\\top X\\) is not invertible. Drop one level (it becomes the reference). Regularised models and trees don't need this.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "How do you interpret a coefficient when y is log-transformed?",
+  "a": "<p>For \\(\\log y = \\dots + w x\\), a one-unit increase in x changes y by about \\(100\\,w\\)% (exactly \\(100(e^{w}-1)\\)%). In a log-log model, w is an elasticity: 1% change in x → w% change in y.</p>"
+ },
+ {
+  "q": "Heteroscedasticity: does it bias the coefficients?",
+  "a": "<p>No, OLS coefficients stay unbiased, but their standard errors are wrong, so p-values and confidence intervals are unreliable. Fix with robust (White/HC) standard errors, weighted least squares, or a log transform of y.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Correlation vs causation: can you say a coefficient is the causal effect?",
+  "a": "<p>Only under strong assumptions (no omitted confounders, no reverse causality). Otherwise it is an association conditional on the other features. For causal effects use experiments (A/B tests) or causal methods (difference-in-differences, instrumental variables, propensity matching, uplift models).</p>"
+ }
+]

@@ -1,0 +1,24 @@
+[
+ {
+  "q": "Walk through how a chat model is trained.",
+  "a": "<p>Pretraining on trillions of tokens with next-token loss → base model. Supervised fine-tuning on instruction–response pairs → follows instructions. Preference tuning with RLHF (reward model + PPO with a KL penalty) or DPO → helpful, harmless style. Then safety tuning and evaluation.</p>"
+ },
+ {
+  "q": "RLHF vs DPO?",
+  "a": "<p>RLHF trains a reward model on human preference pairs, then optimises the policy with PPO against that reward with a KL penalty to the reference model. DPO derives a direct loss on (chosen, rejected) pairs that achieves a similar objective without a separate reward model or RL, so it's simpler and more stable.</p>"
+ },
+ {
+  "q": "Does fine-tuning or RLHF teach the model new facts?",
+  "a": "<p>Mostly no. Knowledge comes from pretraining; later stages mainly shape behaviour and format. Injecting facts via fine-tuning is unreliable and hard to update, so use RAG for knowledge.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "What are scaling laws?",
+  "a": "<p>Empirical power laws showing loss decreases predictably with model size, data and compute. Chinchilla found the compute-optimal balance is about 20 training tokens per parameter; many current models train on far more tokens to make smaller models stronger and cheaper to serve.</p>"
+ },
+ {
+  "q": "Why is there a KL penalty in RLHF?",
+  "a": "<p>Without it, the policy can exploit weaknesses of the reward model (\"reward hacking\") and drift into strange text that scores high but is bad. The KL term keeps it close to the SFT model's distribution.</p>",
+  "gotcha": true
+ }
+]

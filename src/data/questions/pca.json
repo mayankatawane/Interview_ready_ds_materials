@@ -1,0 +1,33 @@
+[
+ {
+  "q": "Why standardise before PCA?",
+  "a": "<p>PCA maximises variance, and variance depends on units. A feature in rupees has huge variance and would dominate PC1 regardless of importance. Standardising means PCA works on correlations.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "How many components do you keep?",
+  "a": "<p>Enough to explain a target share of variance (often 90–95%), the elbow of the scree plot, eigenvalue &gt; 1 (Kaiser rule on standardised data), or the number that gives the best downstream CV score.</p>"
+ },
+ {
+  "q": "Can PCA hurt a supervised model?",
+  "a": "<p>Yes. PCA is unsupervised: it keeps high-variance directions, but the target might depend on a low-variance direction that gets dropped. Use PCA when you need compression or decorrelation, and verify with CV. PLS or LDA consider the target.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Are principal components interpretable?",
+  "a": "<p>Partially: each is a weighted combination of all original features (loadings). You can describe PC1 by its largest loadings (\"overall spend level\"), but it's harder to explain than original features, a downside in regulated settings.</p>"
+ },
+ {
+  "q": "PCA vs t-SNE vs UMAP?",
+  "a": "<p>PCA: linear, fast, preserves global variance, can transform new data, usable as features. t-SNE: non-linear, preserves local neighbourhoods, for 2D visualisation only; cluster sizes and distances between clusters are not meaningful. UMAP: non-linear, faster, preserves more global structure, can transform new points.</p>"
+ },
+ {
+  "q": "Eigen-decomposition or SVD for PCA?",
+  "a": "<p>Libraries use SVD of the centred data matrix \\(X = USV^\\top\\). It's numerically more stable and avoids forming \\(X^\\top X\\). The columns of V are the principal directions and \\(s_k^2/(n-1)\\) are the eigenvalues.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Does PCA remove multicollinearity?",
+  "a": "<p>Yes: principal components are uncorrelated by construction, so regression on components (principal component regression) has no multicollinearity, at the cost of interpretability.</p>"
+ }
+]

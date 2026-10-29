@@ -1,0 +1,60 @@
+---
+import Base from '../layouts/Base.astro';
+import { allTopics, slugOf, url, QUESTIONS } from '../lib/content';
+import { SUBJECTS } from '../data/subjects';
+const topics = await allTopics();
+const bySub = Object.fromEntries(SUBJECTS.map((s) => [s.id, topics.filter((t) => t.data.subject === s.id).map(slugOf)]));
+const totalQ = Object.values(QUESTIONS).reduce((n, l) => n + l.length, 0);
+---
+<Base title="Home" active="home">
+  <section class="hero">
+    <div class="eyebrow">Data science interview prep</div>
+    <h1>Learn it once, revise it anywhere</h1>
+    <p class="lead">Plain-language explanations with every symbol explained, visuals you can play with, and the questions interviewers actually ask.</p>
+  </section>
+  <a class="continue" id="continue" href={url('ml/')} hidden>
+    <div><span class="muted" style="font-size:.8rem">Continue where you left off</span><strong id="contTitle"></strong></div>
+    <span aria-hidden="true">→</span>
+  </a>
+  <div class="statrow">
+    <div class="statcard"><span>Topics revised</span><strong id="revCount">0</strong> <span style="display:inline">/ {topics.length}</span></div>
+    <a class="statcard" href={url('questions/')}><span>Question bank</span><strong>{totalQ}</strong></a>
+    <a class="statcard" href={url('questions/?status=review')}><span>Review pile</span><strong id="revPile" style="color:var(--bad)">0</strong></a>
+    <a class="statcard" href={url('quiz/')}><span>Quiz</span><strong>Start</strong></a>
+  </div>
+  <h2 class="section-title">Subjects</h2>
+  <div class="subjects" id="subjects" data-map={JSON.stringify(bySub)}>
+    {SUBJECTS.map((s) => {
+      const n = bySub[s.id].length;
+      const live = s.live && n > 0;
+      return live ? (
+        <a class="subject" href={url(`${s.id}/`)} style={`--sc:${s.color}`} data-sub={s.id}>
+          <h3>{s.name}</h3><p>{s.blurb}</p>
+          <div class="meta"><span>{n} {n === 1 ? 'topic' : 'topics'}</span><span class="pc">0% revised</span></div>
+          <div class="pbar"><i></i></div>
+        </a>
+      ) : (
+        <div class="subject soon" style={`--sc:${s.color}`}>
+          <h3>{s.name}</h3><p>{s.blurb}</p>
+          <div class="meta"><span>Coming soon</span></div>
+        </div>
+      );
+    })}
+  </div>
+  <script is:inline>
+    (function () {
+      const S = window.DSK, done = S.get('dsk-done', {}), cards = S.get('dsk-cards', {}), last = S.get('dsk-last', null);
+      const map = JSON.parse(document.getElementById('subjects').dataset.map);
+      let total = 0;
+      document.querySelectorAll('.subject[data-sub]').forEach((el) => {
+        const list = map[el.dataset.sub], n = list.filter((s) => done[s]).length; total += n;
+        const pc = list.length ? Math.round(100 * n / list.length) : 0;
+        el.querySelector('.pc').textContent = `${n}/${list.length} revised`;
+        el.querySelector('.pbar i').style.width = pc + '%';
+      });
+      document.getElementById('revCount').textContent = total;
+      document.getElementById('revPile').textContent = Object.values(cards).filter((v) => v === 'r').length;
+      if (last && last.url) { const c = document.getElementById('continue'); c.href = last.url; document.getElementById('contTitle').textContent = last.title; c.hidden = false; }
+    })();
+  </script>
+</Base>

@@ -1,0 +1,45 @@
+[
+ {
+  "q": "How do you choose K?",
+  "a": "<p>Elbow method (inertia vs K, look for the bend), average silhouette score (higher better), Davies-Bouldin (lower), Calinski-Harabasz (higher), gap statistic, BIC for GMM. And business sense: the segments must be actionable and stable.</p>"
+ },
+ {
+  "q": "What is k-means++?",
+  "a": "<p>An initialisation method: choose the first centre randomly, then each next centre with probability proportional to its squared distance from the nearest existing centre. Centres start spread out, so convergence is faster and results are better and more consistent. Default in sklearn.</p>"
+ },
+ {
+  "q": "Does k-means always find the best clustering?",
+  "a": "<p>No. It always converges (inertia never increases) but only to a local optimum that depends on the starting centres. Run several initialisations (<code>n_init</code>) and keep the lowest inertia.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "What are the assumptions or limitations of k-means?",
+  "a": "<p>Clusters roughly spherical, similar size and density; numeric features; you must pick K; sensitive to scaling and outliers (means get pulled). Fails on moons, rings and elongated clusters.</p>"
+ },
+ {
+  "q": "Can you use k-means on categorical data?",
+  "a": "<p>Not directly; means of categories are meaningless. Use k-modes (categorical), k-prototypes (mixed), or Gower distance with hierarchical clustering / k-medoids.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "How do you evaluate clustering without labels?",
+  "a": "<p>Internal metrics: silhouette, Davies-Bouldin, Calinski-Harabasz, inertia. Stability: do clusters stay the same on bootstrap samples? Business validation: are the profiles distinct and actionable? With some labels: adjusted Rand index, NMI.</p>"
+ },
+ {
+  "q": "When would you use DBSCAN instead of k-means?",
+  "a": "<p>Clusters of arbitrary shape, presence of noise/outliers you want flagged, and when you don't know K. DBSCAN groups points with at least minPts neighbours within eps. It struggles with clusters of very different densities (try HDBSCAN) and with high dimensions.</p>"
+ },
+ {
+  "q": "Why do you need to scale before k-means?",
+  "a": "<p>It uses Euclidean distance. Income in rupees (0–10,00,000) would completely dominate age (18–80), so clusters would just be income bands.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "K-means vs GMM?",
+  "a": "<p>K-means gives hard assignments and assumes spherical clusters. GMM gives soft probabilities of membership and allows elliptical clusters with different sizes (full covariance), fitted with EM. K-means is a special case of GMM with equal spherical covariances and hard assignments.</p>"
+ },
+ {
+  "q": "Hierarchical clustering: what are the linkage options?",
+  "a": "<p>Single (closest pair; makes long chains), complete (farthest pair; compact clusters), average (mean pairwise distance), Ward (merge that least increases within-cluster variance; usual default). Cut the dendrogram at a height to get K clusters.</p>"
+ }
+]

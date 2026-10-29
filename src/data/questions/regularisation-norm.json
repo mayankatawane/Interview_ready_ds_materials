@@ -1,0 +1,28 @@
+[
+ {
+  "q": "How does dropout work and why scale by 1/(1−p)?",
+  "a": "<p>During training each activation is zeroed with probability p, so the network can't rely on specific neurons; it's like training an ensemble of sub-networks. The kept activations are divided by (1−p) so their expected value matches inference, when dropout is off (inverted dropout).</p>"
+ },
+ {
+  "q": "BatchNorm vs LayerNorm?",
+  "a": "<p>BatchNorm normalises each feature across the batch and uses running statistics at inference; great for CNNs but depends on batch size and behaves differently in train vs eval. LayerNorm normalises across the features of each example/token; batch-independent and identical in training and inference, so it's the standard in Transformers and RNNs.</p>"
+ },
+ {
+  "q": "What happens if you forget model.eval() at inference?",
+  "a": "<p>Dropout stays on (random, degraded predictions) and BatchNorm uses the current batch's statistics instead of running averages (predictions depend on what else is in the batch). Also use <code>torch.no_grad()</code> to skip gradient tracking.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Why does BatchNorm struggle with small batches?",
+  "a": "<p>The batch mean and variance become noisy estimates with only a few examples, which destabilises training and creates a mismatch with the running statistics used at inference. Use GroupNorm or LayerNorm instead.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "List ways to reduce overfitting in a deep network.",
+  "a": "<p>More data and augmentation, dropout, weight decay (AdamW), early stopping, smaller model, label smoothing, transfer learning from a pretrained model instead of training from scratch, and mixup/cutmix for images.</p>"
+ },
+ {
+  "q": "What is RMSNorm?",
+  "a": "<p>A simplification of LayerNorm that only rescales by the root-mean-square of the features (no mean subtraction, no β): \\(x/\\sqrt{\\text{mean}(x^2)+\\epsilon}\\cdot\\gamma\\). Cheaper, works as well, used in LLaMA-style LLMs.</p>"
+ }
+]

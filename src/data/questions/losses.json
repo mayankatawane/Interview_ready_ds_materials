@@ -1,0 +1,28 @@
+[
+ {
+  "q": "Cross-entropy for logits [2, 1, 0.1] with true class 0?",
+  "a": "<p>Softmax ≈ [0.659, 0.242, 0.099]. Loss = −ln 0.659 ≈ <strong>0.417</strong>. The gradient with respect to the logits is p − y = [−0.341, 0.242, 0.099].</p>"
+ },
+ {
+  "q": "MSE vs MAE vs Huber?",
+  "a": "<p>MSE predicts the mean and punishes large errors heavily (outlier-sensitive). MAE predicts the median and is robust, but its gradient doesn't shrink near the optimum. Huber is quadratic for small errors and linear for large ones: smooth and robust.</p>"
+ },
+ {
+  "q": "Why not use MSE for classification?",
+  "a": "<p>With a sigmoid output, MSE is non-convex in the weights and its gradient contains \\(p(1-p)\\), which is near zero when the model is confidently wrong, so learning stalls. Cross-entropy is the maximum-likelihood loss and gives gradient p − y.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "What is contrastive (InfoNCE) loss and where is it used?",
+  "a": "<p>For a query, it treats one positive example and many negatives (often the other items in the batch) as a classification problem: maximise the softmax score of the positive. It trains embedding models (sentence-transformers, CLIP) so matching pairs end up close, which is what makes semantic search and RAG retrieval work.</p>"
+ },
+ {
+  "q": "What is perplexity?",
+  "a": "<p>The exponential of the average next-token cross-entropy. A perplexity of 10 means the model is, on average, as uncertain as choosing uniformly among 10 tokens. Lower is better; only comparable across models with the same tokenizer.</p>"
+ },
+ {
+  "q": "What is label smoothing?",
+  "a": "<p>Replace one-hot targets with, e.g., 0.9 for the true class and 0.1 spread over the others. It stops the model pushing logits to extremes, improves calibration and sometimes generalisation.</p>",
+  "gotcha": true
+ }
+]

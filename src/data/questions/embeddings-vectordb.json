@@ -1,0 +1,32 @@
+[
+ {
+  "q": "How does a sentence embedding model work?",
+  "a": "<p>A Transformer encoder reads the text and its token vectors are pooled into one vector. It's trained contrastively on (query, relevant passage) pairs with in-batch negatives, so related texts get high cosine similarity.</p>"
+ },
+ {
+  "q": "Can you use different embedding models for documents and queries?",
+  "a": "<p>No. Each model has its own vector space; distances across models are meaningless. Use the same model and version, and re-embed everything when you switch.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Cosine vs dot product vs Euclidean distance?",
+  "a": "<p>Cosine measures angle, ignoring length; dot product includes length; L2 measures straight-line distance. For unit-normalised vectors all three give the same ranking (\\(\\|a-b\\|^2 = 2 - 2a\\cdot b\\)). Use what the embedding model was trained for.</p>"
+ },
+ {
+  "q": "Explain HNSW.",
+  "a": "<p>Hierarchical Navigable Small World: a multi-layer graph where each vector links to nearby vectors. Search starts at a sparse top layer, greedily hops toward the query, and descends to denser layers. Fast with high recall; tuned with M (links per node), efConstruction and efSearch; uses a lot of memory.</p>"
+ },
+ {
+  "q": "HNSW vs IVF-PQ?",
+  "a": "<p>HNSW: graph-based, very fast and accurate, memory-hungry. IVF-PQ: cluster vectors (IVF) and search only the nearest clusters, with vectors compressed by product quantisation; far less memory, somewhat lower recall. Choose by scale, memory budget and recall target.</p>"
+ },
+ {
+  "q": "How do you pick an embedding model?",
+  "a": "<p>Check MTEB retrieval scores for your language and domain, then test on your own question set (recall@k). Consider max input length, dimension (storage), latency, cost, multilingual needs, and whether it can be hosted where your data must stay.</p>"
+ },
+ {
+  "q": "Pre-filtering vs post-filtering in vector search?",
+  "a": "<p>Post-filtering retrieves top-k by similarity and then drops items that fail the metadata filter, which can leave too few results. Pre-filtering restricts the search to items that pass the filter first, which is correct but harder to do efficiently with ANN indexes. Good vector DBs support filtered search natively.</p>",
+  "gotcha": true
+ }
+]

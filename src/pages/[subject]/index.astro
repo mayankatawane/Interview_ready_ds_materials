@@ -1,0 +1,43 @@
+---
+import Base from '../../layouts/Base.astro';
+import { allTopics, slugOf, topicUrl, url, questionsFor } from '../../lib/content';
+import { SUBJECTS } from '../../data/subjects';
+
+export async function getStaticPaths() {
+  const topics = await allTopics();
+  return SUBJECTS.filter((s) => topics.some((t) => t.data.subject === s.id)).map((s) => ({ params: { subject: s.id }, props: { sid: s.id } }));
+}
+const s = SUBJECTS.find((x) => x.id === Astro.props.sid)!;
+const topics = (await allTopics()).filter((t) => t.data.subject === s.id);
+const groups = [...new Set(topics.map((t) => t.data.group))];
+let n = 0;
+---
+<Base title={s.name}>
+  <div class="crumbs"><a href={url('')}>Home</a><span>›</span><span>{s.name}</span></div>
+  <h1>{s.name}</h1>
+  <p class="lead">{s.blurb}. Tap a topic to learn it; the tick means you've marked it revised.</p>
+  <div class="pbar" style={`--sc:${s.color};max-width:420px`}><i id="sp"></i></div>
+  <p class="muted" id="spt" style="font-size:.85rem;margin:6px 0 0"></p>
+  {groups.map((g) => (
+    <section class="group">
+      <h2>{g}</h2>
+      <div class="tlist">
+        {topics.filter((t) => t.data.group === g).map((t) => (
+          <a class="trow" href={topicUrl(t)} data-slug={slugOf(t)}>
+            <span class="n">{String(++n).padStart(2, '0')}</span>
+            <span><strong>{t.data.short}</strong><small>{t.data.summary}</small><small>{t.data.minutes ? `${t.data.minutes} min · ` : ''}{questionsFor(slugOf(t)).length} questions</small></span>
+            <span class="done-dot" aria-hidden="true">✓</span>
+          </a>
+        ))}
+      </div>
+    </section>
+  ))}
+  <script is:inline>
+    (function () {
+      const done = window.DSK.get('dsk-done', {}), rows = [...document.querySelectorAll('.trow')];
+      let n = 0; rows.forEach((r) => { if (done[r.dataset.slug]) { r.classList.add('is-done'); n++; } });
+      document.getElementById('sp').style.width = (rows.length ? 100 * n / rows.length : 0) + '%';
+      document.getElementById('spt').textContent = `${n} of ${rows.length} topics revised`;
+    })();
+  </script>
+</Base>

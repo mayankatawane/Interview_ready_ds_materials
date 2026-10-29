@@ -1,0 +1,54 @@
+[
+ {
+  "q": "Precision vs recall: give a use case for each.",
+  "a": "<p>Recall when missing a positive is costly: cancer screening, fraud, safety defects. Precision when false alarms are costly: spam filter (deleting real email), expensive field investigations, sales reps' limited visits. F1 or Fβ when you need both.</p>"
+ },
+ {
+  "q": "What does an AUC of 0.8 mean?",
+  "a": "<p>If you pick one random positive and one random negative, there's an 80% chance the model scores the positive higher. It measures ranking quality across all thresholds, not accuracy at a specific threshold.</p>"
+ },
+ {
+  "q": "Your model has AUC 0.35. What happened?",
+  "a": "<p>The ranking is inverted: it's systematically wrong, which is informative. Likely a label or sign mistake (e.g. predicting P(class 0)). Flipping the scores gives AUC 0.65.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "ROC vs PR curve: when to use which?",
+  "a": "<p>ROC (TPR vs FPR) is insensitive to class ratio and fine for balanced problems. PR (precision vs recall) focuses on the positive class and drops sharply with rare positives, so it's better for fraud, disease, churn with low base rate. PR-AUC baseline = prevalence; ROC-AUC baseline = 0.5.</p>"
+ },
+ {
+  "q": "Why is F1 a harmonic mean, not an arithmetic mean?",
+  "a": "<p>The harmonic mean is dominated by the smaller value, so a model can't get a good F1 by maxing one metric and ignoring the other. P = 1.0, R = 0.01: arithmetic mean 0.505, F1 = 0.02.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "What is Gini and KS in credit risk?",
+  "a": "<p>Gini = 2 × AUC − 1 (0 = random, 1 = perfect). KS = maximum difference between the cumulative distributions of goods and bads across score thresholds = max(TPR − FPR). Typical good scorecards: Gini 0.4–0.7, KS 0.3–0.5.</p>"
+ },
+ {
+  "q": "What is calibration and how do you check it?",
+  "a": "<p>A model is calibrated if, among cases scored 0.3, about 30% are positive. Check with a reliability diagram and Brier score / log loss. Fix with Platt scaling (sigmoid) or isotonic regression on held-out data. Matters when probabilities drive decisions (pricing, expected loss).</p>"
+ },
+ {
+  "q": "Macro vs micro vs weighted F1?",
+  "a": "<p>Macro: average per-class F1 equally, so rare classes count as much as common ones. Weighted: weighted by class support. Micro: pool all TP/FP/FN, so it's dominated by large classes; for single-label multiclass, micro F1 = accuracy.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "What is the accuracy paradox?",
+  "a": "<p>On imbalanced data a useless model can have very high accuracy: predicting \"no fraud\" always is 99.5% accurate if fraud is 0.5%. Accuracy hides the minority class.</p>"
+ },
+ {
+  "q": "What is lift?",
+  "a": "<p>Lift at a cut-off = positive rate among the top-scored group / overall positive rate. If the top 10% have 15% churners vs 3% overall, lift = 5: targeting them is 5× better than random. Used for campaign planning.</p>"
+ },
+ {
+  "q": "Can two models with the same AUC perform differently in production?",
+  "a": "<p>Yes. AUC averages over all thresholds; the business uses one threshold or the top k. One model might be better at the top of the list, the other in the middle. Also calibration can differ. Compare precision/recall at the operating point and lift in the top deciles.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Log loss vs accuracy: why care about log loss?",
+  "a": "<p>Log loss evaluates the probabilities, not just the hard labels. Two models with the same accuracy can differ: one says 0.51 for every positive, another says 0.95. Log loss punishes confident wrong predictions heavily.</p>"
+ }
+]

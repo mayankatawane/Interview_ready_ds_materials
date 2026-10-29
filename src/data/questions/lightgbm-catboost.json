@@ -1,0 +1,45 @@
+[
+ {
+  "q": "What is the difference between leaf-wise and level-wise growth?",
+  "a": "<p>Level-wise (XGBoost default) splits every leaf at a depth before going deeper: balanced trees. Leaf-wise (LightGBM) always splits the single leaf with the largest gain: for the same number of leaves it reaches lower loss, but trees get deep and lopsided and can overfit small data. Control with <code>num_leaves</code>, <code>min_data_in_leaf</code> and <code>max_depth</code>.</p>"
+ },
+ {
+  "q": "Explain GOSS.",
+  "a": "<p>Gradient-based One-Side Sampling. Rows with large gradients are poorly predicted and carry most of the information, so keep all of them (top a%). Randomly sample b% of the small-gradient rows and multiply their weight by (1−a)/b so the gain estimate stays unbiased. Fewer rows per split search, similar accuracy.</p>"
+ },
+ {
+  "q": "Explain EFB.",
+  "a": "<p>Exclusive Feature Bundling. Many sparse features are rarely non-zero at the same time (e.g. one-hot columns). LightGBM bundles such mutually exclusive features into one feature by offsetting their value ranges, reducing the number of features to scan with almost no information loss.</p>"
+ },
+ {
+  "q": "num_leaves vs max_depth in LightGBM?",
+  "a": "<p>num_leaves is the main complexity control for leaf-wise trees. A depth-d level-wise tree has at most \\(2^d\\) leaves, so setting num_leaves close to \\(2^{\\text{max\\_depth}}\\) (e.g. 127 for depth 7) gives very deep, overfit trees. Keep num_leaves well below that, and raise min_data_in_leaf on small data.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Why is LightGBM faster than XGBoost?",
+  "a": "<p>Histogram binning (fewer split candidates, lower memory), GOSS (fewer rows), EFB (fewer features), leaf-wise growth (fewer splits for the same loss), and efficient native categorical handling. XGBoost's <code>hist</code> method has closed much of the gap.</p>"
+ },
+ {
+  "q": "How does CatBoost handle categorical features?",
+  "a": "<p>Ordered target statistics: shuffle rows, and encode each row's category using the mean target of only the earlier rows with the same category, plus a prior. A row's own label is never used, so there is no target leakage. It also builds combinations of categorical features automatically.</p>"
+ },
+ {
+  "q": "What is prediction shift and how does ordered boosting fix it?",
+  "a": "<p>In standard boosting, residuals for a row are computed by a model that was trained on that same row, so they're biased (too small) compared to new data: a subtle overfit. CatBoost's ordered boosting computes each row's residual with a model trained only on rows before it in a permutation.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "What are symmetric (oblivious) trees and why use them?",
+  "a": "<p>Every node at the same depth uses the same split condition. The tree is perfectly balanced, acts as regularisation, and prediction is extremely fast: a depth-6 tree is 6 comparisons forming a 6-bit index into a table of 64 leaf values.</p>"
+ },
+ {
+  "q": "How do you choose between XGBoost, LightGBM and CatBoost?",
+  "a": "<p>LightGBM: very large data, many features, speed matters. CatBoost: many high-cardinality categoricals, want good results with little tuning, low-latency inference. XGBoost: mature default, strong ecosystem, good with numeric features. Often try all three quickly and compare on the same validation scheme.</p>"
+ },
+ {
+  "q": "How does LightGBM split categorical features natively?",
+  "a": "<p>For a categorical feature it sorts categories by their gradient statistic (sum of gradients / sum of hessians) and finds the best split point in that order, which finds an optimal binary partition of categories without one-hot encoding. Use <code>min_data_per_group</code> and <code>cat_smooth</code> to avoid overfitting rare categories.</p>",
+  "gotcha": true
+ }
+]

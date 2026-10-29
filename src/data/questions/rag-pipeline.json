@@ -1,0 +1,32 @@
+[
+ {
+  "q": "Explain RAG end to end.",
+  "a": "<p>Offline: load documents, parse text and tables, chunk, add metadata, embed, store in a vector index (plus BM25). Online: rewrite the query, retrieve candidates with hybrid search and filters, rerank, build a context within the token budget with source labels, generate with instructions to answer only from the context and cite, then run checks and log.</p>"
+ },
+ {
+  "q": "RAG vs fine-tuning?",
+  "a": "<p>RAG adds external, updatable knowledge with citations and access control, with no retraining. Fine-tuning changes the model's behaviour, style or format and is poor at injecting facts. Use RAG for knowledge, fine-tuning for behaviour, or both.</p>"
+ },
+ {
+  "q": "The RAG answer is wrong. How do you debug it?",
+  "a": "<p>Check the trace: was the right chunk retrieved? If not: parsing, chunking, embedding fit, query rewriting, hybrid search, filters. If retrieved but ranked low: reranking, more candidates. If in the context but the answer is still wrong: prompt, too much noise, chunk ordering, model choice. Then add the case to the evaluation set.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "How do you handle tables and numbers in RAG?",
+  "a": "<p>Use table-aware parsing, store tables as Markdown or HTML chunks with their headers, optionally embed a summary while returning the full table, or load structured data into a database and route numeric questions to text-to-SQL.</p>"
+ },
+ {
+  "q": "How do you enforce access control in RAG?",
+  "a": "<p>Store permissions (groups, roles, document ACLs) as metadata on each chunk and apply them as filters at retrieval time based on the user's identity, so unauthorised content never reaches the prompt. Don't rely on the LLM to hide it.</p>"
+ },
+ {
+  "q": "What is GraphRAG and when is it useful?",
+  "a": "<p>Retrieval over a knowledge graph of entities and relationships (and sometimes community summaries built from it). It helps multi-hop questions (\"which HCPs in Pune prescribe drugs from trials led by X?\") and global questions that need connections across many documents, which plain chunk similarity misses.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "What is agentic RAG?",
+  "a": "<p>An agent decides when and where to retrieve (vector store, SQL, knowledge graph, web), can rewrite queries, grade results, and loop until it has enough context. More flexible for complex questions, but slower and harder to control than a fixed pipeline.</p>"
+ }
+]

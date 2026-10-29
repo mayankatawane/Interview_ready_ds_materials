@@ -1,0 +1,51 @@
+[
+ {
+  "q": "Gini vs entropy: which and why?",
+  "a": "<p>Both measure impurity and usually choose very similar splits. Gini (default in sklearn) is slightly faster because there's no logarithm. Entropy is a bit more sensitive to changes in class probabilities and tends to produce slightly more balanced trees. In practice, tune depth and leaf size; the criterion rarely matters.</p>"
+ },
+ {
+  "q": "How does a tree split a continuous feature?",
+  "a": "<p>Sort the unique values, try a threshold at each midpoint between consecutive values, compute the impurity gain for each, keep the best. Libraries like XGBoost and LightGBM use histogram bins instead to save time.</p>"
+ },
+ {
+  "q": "Can a regression tree extrapolate?",
+  "a": "<p>No. Each leaf predicts the mean of its training targets, so predictions are bounded by the training range. If house prices in training go up to ₹2 Cr, a ₹5 Cr house is still predicted at about ₹2 Cr. Same for Random Forest and boosting. Use linear models or add trend features for extrapolation.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "How do you prevent a decision tree from overfitting?",
+  "a": "<p>Pre-pruning: max_depth, min_samples_leaf, min_samples_split, max_leaf_nodes, min_impurity_decrease. Post-pruning: grow fully then prune with cost-complexity pruning (<code>ccp_alpha</code>), chosen by cross-validation. Or use an ensemble.</p>"
+ },
+ {
+  "q": "Why do decision trees have high variance?",
+  "a": "<p>Splits are greedy and hierarchical. A small change in the data can change the root split, and every split below it changes too, giving a completely different tree. That's why averaging many trees (bagging, Random Forest) works so well.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Do trees need feature scaling or one-hot encoding?",
+  "a": "<p>No scaling: splits depend only on the order of values. One-hot is optional and often worse for high-cardinality features (many sparse weak splits). Ordinal, frequency or target encoding, or native categorical support, usually works better.</p>"
+ },
+ {
+  "q": "Information gain is biased toward which features? How is that fixed?",
+  "a": "<p>Features with many distinct values (like an ID column) can split data into tiny pure groups and get very high information gain while being useless. C4.5 uses <strong>gain ratio</strong> (gain divided by split information) to correct this.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "ID3 vs C4.5 vs CART?",
+  "a": "<p>ID3: categorical features, entropy/information gain, multi-way splits. C4.5: adds continuous features, gain ratio, missing values, pruning. CART (used by sklearn): binary splits only, Gini for classification and MSE for regression, cost-complexity pruning.</p>"
+ },
+ {
+  "q": "What's the time complexity of training a tree?",
+  "a": "<p>Roughly \\(O(p \\cdot n \\log n)\\) per level (sorting each feature), about \\(O(p\\, n \\log^2 n)\\) for a balanced tree overall. Prediction is \\(O(\\text{depth})\\).</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Your data has a diagonal boundary (y > x). Why does a tree struggle?",
+  "a": "<p>Splits are axis-aligned, so the tree approximates a diagonal with a staircase of many splits. Fix with a feature like x − y, a rotation (PCA), or a model that learns oblique boundaries (logistic regression, SVM).</p>",
+  "gotcha": true
+ },
+ {
+  "q": "How does a decision tree handle missing values?",
+  "a": "<p>Depends on the implementation. CART can use surrogate splits (a backup feature that mimics the primary split). sklearn (≥ 1.3) learns which side to send missing values. XGBoost/LightGBM learn a default direction. Otherwise impute and add a missing flag.</p>"
+ }
+]

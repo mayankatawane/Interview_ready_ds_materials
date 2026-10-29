@@ -1,0 +1,31 @@
+[
+ {
+  "q": "Why use hybrid search?",
+  "a": "<p>Dense retrieval captures meaning and paraphrases; BM25 catches exact terms like product codes, names and acronyms that embeddings blur. Combining them (usually with Reciprocal Rank Fusion) beats either alone on most real corpora.</p>"
+ },
+ {
+  "q": "Explain Reciprocal Rank Fusion.",
+  "a": "<p>For each document, sum 1/(k + rank) across the ranked lists it appears in, with k ≈ 60. It uses ranks, not raw scores, so BM25 and cosine scores don't need to be on the same scale. Documents ranked well by both retrievers rise to the top.</p>"
+ },
+ {
+  "q": "Bi-encoder vs cross-encoder?",
+  "a": "<p>Bi-encoder: embeds query and document separately, so document vectors are precomputed and search over millions is fast, but matching is coarse. Cross-encoder: reads query and document together and outputs a relevance score; much more accurate but one model call per pair, so used only to rerank the top 20–100 candidates.</p>"
+ },
+ {
+  "q": "What is HyDE?",
+  "a": "<p>Hypothetical Document Embeddings: ask the LLM to write a plausible answer to the question, embed that answer, and search with it. A fake answer resembles real documents more than a short question does, which can improve recall.</p>"
+ },
+ {
+  "q": "Retrieval misses a document containing the exact code the user typed. Why?",
+  "a": "<p>Dense embeddings capture meaning and often don't preserve rare exact strings like codes or IDs. Add BM25 / hybrid search, or extract the code into a metadata filter.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "What is MMR?",
+  "a": "<p>Maximal Marginal Relevance picks results one by one, balancing relevance to the query against similarity to results already chosen. It avoids filling the context with near-duplicate chunks.</p>"
+ },
+ {
+  "q": "How do you handle follow-up questions in a chat RAG?",
+  "a": "<p>Condense the chat history and the new message into a standalone question with an LLM (\"what about oncology?\" → \"What is the reimbursement limit for oncology conferences?\") before retrieval.</p>"
+ }
+]

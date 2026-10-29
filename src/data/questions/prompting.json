@@ -1,0 +1,19 @@
+[
+ {
+  "q": "What makes a good prompt?",
+  "a": "<p>A clear role and task, relevant context clearly delimited, explicit constraints (answer only from context, say \"I don't know\"), a few examples of the exact format, and a defined output schema. Then test it on an evaluation set and iterate.</p>"
+ },
+ {
+  "q": "Zero-shot vs few-shot vs chain-of-thought?",
+  "a": "<p>Zero-shot: instructions only. Few-shot: include examples so the model copies the pattern (in-context learning). Chain-of-thought: ask for step-by-step reasoning before the answer, which helps multi-step problems at the cost of more tokens.</p>"
+ },
+ {
+  "q": "What is prompt injection and how do you defend against it?",
+  "a": "<p>Instructions hidden in user input or retrieved content that try to override the system prompt or trigger tools. Defences: treat retrieved/user content as data with clear delimiters, input/output classifiers, least-privilege tools, human approval for risky actions, never placing secrets in prompts, and monitoring.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "How do you manage prompts in production?",
+  "a": "<p>Version them like code, keep them out of hard-coded strings (templates/config), evaluate every change against a golden test set, log which prompt version produced each answer, and A/B test significant changes.</p>"
+ }
+]

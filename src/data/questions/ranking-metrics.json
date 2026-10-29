@@ -1,0 +1,37 @@
+[
+ {
+  "q": "Define precision@k and recall@k with an example.",
+  "a": "<p>Precision@k = relevant items in the top k / k. Recall@k = relevant items in the top k / all relevant items. Example: top 4 results contain 2 relevant out of 3 relevant total → P@4 = 0.5, R@4 = 0.67. As k grows, recall rises and precision usually falls.</p>"
+ },
+ {
+  "q": "When would you use precision@k in a business problem?",
+  "a": "<p>When capacity is fixed. Reps can visit 200 doctors a week, the fraud team can review 50 alerts a day, the app shows 5 recommendations. Precision@k tells you how many of those slots are well used. Recall@k tells you what share of the opportunity you're capturing.</p>"
+ },
+ {
+  "q": "Two rankings have the same precision@5. How can one still be better?",
+  "a": "<p>Precision@k ignores order within the top k. If one puts the relevant items at ranks 1–2 and the other at ranks 4–5, the first is better for users. MAP, MRR and NDCG reward relevant items appearing earlier.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Explain NDCG.",
+  "a": "<p>DCG sums the gain of each result discounted by its position, \\(\\text{gain}/\\log_2(i+1)\\), so a relevant item at rank 1 counts fully and at rank 10 counts much less. Divide by the DCG of the ideal ordering (IDCG) to get NDCG in [0, 1]. It supports graded relevance (very relevant, somewhat relevant).</p>"
+ },
+ {
+  "q": "MAP vs MRR?",
+  "a": "<p>MRR only looks at the first relevant result (1/rank), good when one right answer is enough (Q&amp;A, navigation search). MAP averages precision at every relevant position, good when users want several relevant items (recommendations, document retrieval).</p>"
+ },
+ {
+  "q": "How are these metrics used in RAG?",
+  "a": "<p>For the retrieval step: recall@k (is the gold chunk in the top k passed to the LLM?), hit rate@k, MRR (how high is it ranked?), NDCG if you have graded relevance. Generation is evaluated separately (faithfulness, answer relevance).</p>",
+  "gotcha": true
+ },
+ {
+  "q": "A user has only 2 relevant items. What's the maximum precision@10?",
+  "a": "<p>2/10 = 0.2. Precision@k is capped when there are fewer than k relevant items, so averages across users can be misleading. Use R-precision, recall@k or NDCG in that case.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Offline ranking metrics vs online metrics?",
+  "a": "<p>Offline: precision@k, NDCG on historical data, but biased by what was shown in the past. Online: click-through rate, conversion, revenue per session, measured with A/B tests. Offline gains don't always translate online, so confirm with an experiment.</p>"
+ }
+]

@@ -1,0 +1,54 @@
+[
+ {
+  "q": "How do you handle missing values?",
+  "a": "<p>First understand why they're missing (MCAR, MAR, MNAR). Then: drop columns that are mostly empty and uninformative; impute median for skewed numeric, a \"Missing\" category for categorical; KNN or iterative imputation for MAR; always consider a missing-indicator flag; let XGBoost/LightGBM handle NaN natively. Fit imputers only on training data.</p>"
+ },
+ {
+  "q": "How do you encode a categorical feature with 5,000 levels?",
+  "a": "<p>Not one-hot. Options: smoothed target encoding computed out-of-fold; frequency encoding; grouping rare levels into \"Other\"; hashing; native categorical support in LightGBM/CatBoost; embeddings in a neural net. I'd usually start with CatBoost or out-of-fold target encoding.</p>"
+ },
+ {
+  "q": "Why must target encoding be done out-of-fold?",
+  "a": "<p>If a row's own label is included in its category's mean, the feature partly contains the answer. For rare categories (n = 1) it is the answer. The model looks great in CV and fails in production. Compute each row's encoding from other folds only, and add smoothing toward the global mean.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Which models need feature scaling?",
+  "a": "<p>Distance or gradient based and regularised ones: KNN, K-means, SVM, PCA, linear/logistic regression with regularisation, neural networks. Not trees, Random Forest, XGBoost, LightGBM, CatBoost.</p>"
+ },
+ {
+  "q": "Standardisation vs normalisation?",
+  "a": "<p>Standardisation (z-score) gives mean 0, std 1; good default, keeps outliers as large values. Min-max normalisation squeezes to [0, 1]; good for bounded inputs like images or neural nets, but one outlier compresses everything else. Robust scaling uses median and IQR when outliers are present.</p>"
+ },
+ {
+  "q": "How do you treat outliers?",
+  "a": "<p>First decide if they're errors (fix or drop) or real extremes (keep). Detect with IQR, z-score, isolation forest. Treat by capping/winsorising, log transform, robust scaling, or using robust models/losses (trees, Huber). Never drop outliers from the test set.</p>"
+ },
+ {
+  "q": "Give an example of data leakage you've seen.",
+  "a": "<p>Example: in a loan default model, a feature \"number of collection calls\" was strongly predictive, but calls only happen after a customer starts missing payments, so it wouldn't exist at application time. Signs: suspiciously high AUC and one feature dominating importance. Other common ones: scaling or SMOTE before the split, random split on time data, same customer in train and test.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "What feature selection methods do you know?",
+  "a": "<p>Filter (correlation, mutual information, chi-square, IV, variance threshold), wrapper (RFE, forward/backward selection, Boruta), embedded (L1, tree importance, SHAP-based). Also remove near-duplicates via correlation or VIF and check stability across folds.</p>"
+ },
+ {
+  "q": "How do you engineer features from a date?",
+  "a": "<p>Day of week, month, quarter, holiday flag, month-end flag, days since an event, tenure, time to next event. Cyclic sine/cosine encoding for periodic parts. For time series, lags and rolling statistics computed only from the past.</p>"
+ },
+ {
+  "q": "What is WOE and IV, and when is high IV a red flag?",
+  "a": "<p>WOE = ln(%good / %bad) per bin, which puts each bin on the log-odds scale for logistic regression. IV sums (%good − %bad) × WOE and measures predictive power. IV above about 0.5 is suspiciously strong and often signals leakage or a target-derived feature.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Why use log transform on a feature?",
+  "a": "<p>To reduce right skew (income, spend, counts), make relationships closer to linear, and reduce outlier influence. Use log1p for zeros; Yeo-Johnson for negatives. Trees don't need it.</p>"
+ },
+ {
+  "q": "Binning a continuous variable: pros and cons?",
+  "a": "<p>Pros: robust to outliers, captures non-linear effects in linear models, interpretable (scorecards), handles missing as a bin. Cons: loses information within bins, arbitrary boundaries, jumps at edges. Trees bin automatically, so it's mostly useful for linear models.</p>",
+  "gotcha": true
+ }
+]

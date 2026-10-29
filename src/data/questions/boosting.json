@@ -1,0 +1,50 @@
+[
+ {
+  "q": "What's the difference between bagging and boosting?",
+  "a": "<p>Bagging trains independent models in parallel on bootstrap samples and averages them; it mainly reduces variance and uses deep trees. Boosting trains models sequentially, each correcting the previous ensemble's errors; it mainly reduces bias and uses shallow trees. Boosting is more accurate when tuned but more sensitive to noise and can overfit with too many rounds.</p>"
+ },
+ {
+  "q": "Why is it called gradient boosting?",
+  "a": "<p>Each new tree is fitted to the negative gradient of the loss with respect to the current predictions (the pseudo-residuals). Adding that tree is a step of gradient descent, but in the space of functions rather than parameters. For squared error the negative gradient is exactly the residual y − F.</p>"
+ },
+ {
+  "q": "Why does boosting use shallow trees?",
+  "a": "<p>Each tree only needs to make a small correction; shallow trees are weak learners with high bias and low variance, so the ensemble reduces bias gradually without overfitting. Depth also sets the interaction order: depth 2 captures pairwise interactions. Typical depth is 3–8.</p>"
+ },
+ {
+  "q": "Can gradient boosting overfit as you add trees? Can Random Forest?",
+  "a": "<p>Boosting: yes, each round fits remaining errors, eventually fitting noise. Use early stopping on validation. Random Forest: no, more trees only stabilise the average.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "What is the trade-off between learning rate and number of trees?",
+  "a": "<p>A smaller learning rate shrinks each tree's contribution, so you need more trees, but the model generalises better because it takes small careful steps. Typical: η = 0.01–0.1 with early stopping choosing the number of trees. η = 1 with many trees overfits quickly (try it in the visual).</p>"
+ },
+ {
+  "q": "AdaBoost vs Gradient Boosting?",
+  "a": "<p>AdaBoost re-weights rows: misclassified rows get more weight for the next learner, and each learner gets a vote α = ½ ln((1−ε)/ε). Gradient boosting fits residuals (negative gradients) of any differentiable loss. AdaBoost is gradient boosting with exponential loss, which makes it very sensitive to outliers and label noise.</p>"
+ },
+ {
+  "q": "What are the pseudo-residuals for binary log loss?",
+  "a": "<p>With F as the log-odds and p = σ(F), the negative gradient is y − p. So each tree fits \"label minus predicted probability\". The leaf values use a Newton step: sum(y − p) / sum(p(1 − p)).</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Is boosting parallelisable?",
+  "a": "<p>Not across trees, because each tree needs the previous predictions. But building one tree is parallelised: XGBoost and LightGBM search splits across features and histogram bins in parallel, and use GPUs.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "How do you make gradient boosting robust to outliers?",
+  "a": "<p>Use Huber or absolute-error loss instead of squared error, cap extreme target values, use row subsampling, a lower learning rate, and min-samples-per-leaf constraints.</p>"
+ },
+ {
+  "q": "An AdaBoost weak learner has 50% error. What weight does it get?",
+  "a": "<p>α = ½ ln(0.5/0.5) = 0. It's no better than chance, so it gets no vote. Below 50% error α &gt; 0; above 50%, α &lt; 0 (its predictions are flipped).</p>",
+  "gotcha": true
+ },
+ {
+  "q": "What is stochastic gradient boosting?",
+  "a": "<p>Each tree is fitted on a random subsample of rows (<code>subsample</code> &lt; 1), and often a random subset of columns. Adds randomness that reduces variance and speeds up training, similar in spirit to bagging.</p>"
+ }
+]

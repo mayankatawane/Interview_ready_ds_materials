@@ -1,0 +1,27 @@
+[
+ {
+  "q": "Why do vanilla RNNs struggle with long sequences?",
+  "a": "<p>Backprop through time multiplies one Jacobian per step, so gradients from distant steps shrink (vanish) or grow (explode) exponentially. The model can't learn long-range dependencies; exploding gradients need clipping.</p>"
+ },
+ {
+  "q": "Explain the LSTM gates.",
+  "a": "<p>Forget gate: how much of the old cell state to keep. Input gate + candidate: what new information to write. Output gate: how much of the cell state to expose as the hidden state. The cell state is updated additively, \\(c_t = f_t c_{t-1} + i_t\\tilde c_t\\), so gradients can flow across many steps when f ≈ 1.</p>"
+ },
+ {
+  "q": "LSTM vs GRU?",
+  "a": "<p>GRU merges gates into update and reset gates and has no separate cell state, so it has about 25% fewer parameters and trains faster. Accuracy is often similar; LSTM can be slightly better on long or complex sequences.</p>"
+ },
+ {
+  "q": "Why can't you use a bidirectional RNN for text generation?",
+  "a": "<p>The backward direction reads future tokens, which don't exist yet when generating left to right. Bidirectional models suit tagging and classification where the whole input is available.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Why did Transformers replace RNNs?",
+  "a": "<p>RNNs process tokens sequentially (no parallelism across time during training) and pass information through every intermediate step. Attention connects any two positions directly and processes all positions in parallel, scaling much better on GPUs, at the cost of O(n²) attention.</p>"
+ },
+ {
+  "q": "How many parameters in an LSTM layer with input 100 and hidden 128?",
+  "a": "<p>4 × (128 × (128 + 100) + 128) = 4 × (29,184 + 128) = <strong>117,248</strong>.</p>"
+ }
+]

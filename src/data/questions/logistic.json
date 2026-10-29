@@ -1,0 +1,60 @@
+[
+ {
+  "q": "Why not use linear regression for classification?",
+  "a": "<p>Linear regression outputs can go below 0 or above 1, so they aren't probabilities. It's also very sensitive to points far from the boundary: adding easy, extreme examples shifts the line and changes the threshold. Logistic regression models log-odds and squashes them through a sigmoid, giving valid probabilities trained by maximum likelihood.</p>"
+ },
+ {
+  "q": "Why log loss and not MSE for logistic regression?",
+  "a": "<p>MSE combined with a sigmoid is <strong>non-convex</strong> in the weights, so gradient descent can get stuck. It also gives tiny gradients when the model is confidently wrong (sigmoid is flat at the ends). Log loss is convex, is the maximum-likelihood objective for a Bernoulli target, and punishes confident mistakes heavily: −log(0.01) = 4.6.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Is logistic regression a linear classifier?",
+  "a": "<p>Yes. It predicts class 1 when \\(w^\\top x + b \\ge \\text{logit}(t)\\), which is a hyperplane. The probability is non-linear (sigmoid), but the decision boundary is linear in the features. For curved boundaries, add polynomial or interaction features.</p>"
+ },
+ {
+  "q": "How many models does one-vs-one train for 5 classes? One-vs-rest? Multinomial?",
+  "a": "<p>OvO: K(K−1)/2 = 10. OvR: K = 5. Multinomial (softmax): 1 model with 5 weight vectors (one is redundant, so effectively 4 are free).</p>",
+  "gotcha": true
+ },
+ {
+  "q": "How do you interpret a logistic regression coefficient?",
+  "a": "<p>A one-unit increase in \\(x_j\\), holding others fixed, adds \\(w_j\\) to the log-odds, i.e. multiplies the odds by \\(e^{w_j}\\). For w = 0.7, odds roughly double. The change in <em>probability</em> depends on where you are on the S-curve, so it's not constant.</p>"
+ },
+ {
+  "q": "What are the assumptions of logistic regression?",
+  "a": "<p>Linear relationship between features and log-odds, independent observations, little multicollinearity, enough events per feature (rule of thumb ~10), no extreme influential outliers. It does <em>not</em> need normally distributed features or errors, or constant variance.</p>"
+ },
+ {
+  "q": "What happens if the classes are perfectly separable?",
+  "a": "<p>The likelihood keeps increasing as weights grow, so the weights go to infinity and the solver doesn't converge (sklearn gives a convergence warning). Regularisation (the default L2 in sklearn) keeps them finite.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Does logistic regression need feature scaling?",
+  "a": "<p>The unregularised optimum doesn't depend on scaling (coefficients just rescale). But you should scale because: regularisation penalises coefficients unequally otherwise, solvers converge much faster, and coefficients become comparable as importance.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "How do you handle class imbalance in logistic regression?",
+  "a": "<p><code>class_weight=\"balanced\"</code> (weight \\(n/(K n_c)\\)), resampling inside training folds, threshold tuning on validation, and evaluation with PR-AUC or recall at fixed precision. If probabilities matter (PD), recalibrate after weighting or resampling, because they shift the intercept.</p>"
+ },
+ {
+  "q": "Can logistic regression solve XOR?",
+  "a": "<p>Not with the raw two features; no single straight line separates XOR. Add the interaction feature \\(x_1 x_2\\) and it becomes linearly separable. This is the classic argument for hidden layers in neural nets.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Are logistic regression probabilities well calibrated?",
+  "a": "<p>Usually yes, because it directly maximises likelihood. Exceptions: strong regularisation, class weighting or resampling, or a mis-specified model. Check with a reliability plot and Brier score. Compare: Naive Bayes and SVMs are poorly calibrated, Random Forest tends to be under-confident.</p>"
+ },
+ {
+  "q": "Logistic regression vs linear SVM?",
+  "a": "<p>Both learn a linear boundary with L2 regularisation. Logistic uses log loss: every point influences the fit and you get probabilities. SVM uses hinge loss: only points near the margin matter, no native probabilities, often slightly better on high-dimensional text. In practice they perform similarly.</p>"
+ },
+ {
+  "q": "What is the range of the logit (log-odds)?",
+  "a": "<p>−∞ to +∞, which is why it can be modelled as a linear function. The odds range from 0 to ∞; the probability from 0 to 1. Fair coin: odds = 1, log-odds = 0.</p>",
+  "gotcha": true
+ }
+]

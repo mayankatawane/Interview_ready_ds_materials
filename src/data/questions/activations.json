@@ -1,0 +1,28 @@
+[
+ {
+  "q": "Why is ReLU preferred over sigmoid in hidden layers?",
+  "a": "<p>Sigmoid saturates: its derivative is at most 0.25 and near zero for large |z|, so gradients vanish through many layers. ReLU has derivative 1 for positive inputs, is cheap to compute, and gives sparse activations. Its downside is dead neurons.</p>"
+ },
+ {
+  "q": "What is the dying ReLU problem?",
+  "a": "<p>If a neuron's pre-activation is negative for all inputs (often after a big update or with a large negative bias), its output and gradient are zero, so it never recovers. Fixes: Leaky ReLU/PReLU/ELU/GELU, He initialisation, lower learning rate.</p>"
+ },
+ {
+  "q": "Should you apply softmax before nn.CrossEntropyLoss in PyTorch?",
+  "a": "<p>No. It expects raw logits and applies log-softmax internally for numerical stability. Applying softmax yourself effectively applies it twice and hurts training. Likewise use <code>BCEWithLogitsLoss</code> with raw logits instead of sigmoid + BCELoss.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Softmax vs sigmoid for the output layer?",
+  "a": "<p>Softmax for single-label multiclass (probabilities sum to 1, classes compete). Sigmoid per class for multi-label problems where several labels can be true at once, and a single sigmoid for binary classification.</p>"
+ },
+ {
+  "q": "Why subtract the max logit before computing softmax?",
+  "a": "<p>Exponentials of large logits overflow (e^1000 = inf). Softmax is unchanged by adding a constant to all logits, so subtracting the max keeps all exponents ≤ 0 and numerically stable.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Which activation do Transformers use?",
+  "a": "<p>GELU in BERT/GPT-2 style models; SwiGLU (a gated SiLU/Swish variant) in many modern LLMs like LLaMA. They're smooth and slightly better than ReLU empirically.</p>"
+ }
+]

@@ -1,0 +1,36 @@
+[
+ {
+  "q": "Output size of a 64×64 input, 3×3 kernel, padding 1, stride 2?",
+  "a": "<p>⌊(64 + 2 − 3)/2⌋ + 1 = ⌊63/2⌋ + 1 = 31 + 1 = <strong>32</strong>.</p>"
+ },
+ {
+  "q": "How many parameters in a 3×3 conv layer from 32 to 64 channels?",
+  "a": "<p>3 × 3 × 32 × 64 + 64 = 18,432 + 64 = <strong>18,496</strong>, independent of image size.</p>"
+ },
+ {
+  "q": "Why use CNNs instead of dense layers for images?",
+  "a": "<p>Local connectivity and weight sharing: each filter looks at a small patch and is reused at every position. That cuts parameters massively, uses the spatial structure of images, and detects a feature wherever it appears (translation equivariance).</p>"
+ },
+ {
+  "q": "Why stack two 3×3 convolutions instead of one 5×5?",
+  "a": "<p>Same 5×5 receptive field, fewer parameters (2 × 9C² = 18C² vs 25C²) and an extra non-linearity, so more expressive. Three 3×3 layers match a 7×7 (27C² vs 49C²).</p>",
+  "gotcha": true
+ },
+ {
+  "q": "What does pooling do?",
+  "a": "<p>Downsamples feature maps (e.g. 2×2 max pool halves height and width), reducing computation and adding some translation invariance. Global average pooling collapses each channel to one number before the classifier, replacing large dense layers.</p>"
+ },
+ {
+  "q": "What is a 1×1 convolution for?",
+  "a": "<p>It mixes information across channels at each pixel, acting like a dense layer per position. Used to reduce or expand channel counts cheaply (ResNet bottlenecks, Inception) and add non-linearity.</p>"
+ },
+ {
+  "q": "Are CNNs translation invariant?",
+  "a": "<p>Convolutions are translation equivariant: shift the input, the feature map shifts. Pooling adds partial invariance. Full invariance isn't guaranteed (striding and boundaries break it), so shift/crop augmentation still helps.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "How would you build an image classifier with only 2,000 labelled images?",
+  "a": "<p>Transfer learning: take a pretrained backbone (ResNet, EfficientNet, ViT), replace the head, freeze the backbone and train the head with strong augmentation; then unfreeze the top blocks with a small learning rate if validation improves. Use stratified validation and early stopping.</p>"
+ }
+]

@@ -1,0 +1,33 @@
+[
+ {
+  "q": "Why is Naive Bayes called naive?",
+  "a": "<p>It assumes all features are conditionally independent given the class, so \\(P(x\\mid y) = \\prod_j P(x_j\\mid y)\\). In text, \"New\" and \"York\" are clearly not independent, but the model treats them as unrelated clues.</p>"
+ },
+ {
+  "q": "Why does Naive Bayes work well even though the independence assumption is wrong?",
+  "a": "<p>Classification only needs the correct class to have the highest score, not accurate probabilities. Dependencies often affect all classes similarly, so the ranking survives even when the probabilities are badly off. It also has very low variance, so it shines with little data.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "What is the zero-frequency problem?",
+  "a": "<p>If a word never appeared with a class in training, \\(P(\\text{word}\\mid\\text{class}) = 0\\), and the whole product becomes 0 regardless of other evidence. Laplace (add-one) smoothing adds α to every count. Try it in the calculator: \"lottery\" never appears in normal mail.</p>"
+ },
+ {
+  "q": "Generative vs discriminative models?",
+  "a": "<p>Generative models learn how the data is produced, P(x | y) and P(y), then use Bayes' rule (Naive Bayes, GMM, LDA). Discriminative models learn P(y | x) or the boundary directly (logistic regression, SVM, trees). Generative models need less data and handle missing features; discriminative models are usually more accurate with plenty of data.</p>"
+ },
+ {
+  "q": "Are Naive Bayes probabilities reliable?",
+  "a": "<p>No. Multiplying many dependent features as if independent double-counts evidence, pushing probabilities toward 0 or 1. Use the ranking, or calibrate.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "How does Gaussian NB handle continuous features?",
+  "a": "<p>For each class it fits a normal distribution (mean and variance) per feature, and uses the normal density as \\(P(x_j\\mid y)\\). If a feature is far from normal, transform it or bin it.</p>"
+ },
+ {
+  "q": "Why use log-probabilities?",
+  "a": "<p>Multiplying hundreds of probabilities less than 1 underflows to 0 in floating point. Summing logs is numerically stable and gives the same argmax.</p>",
+  "gotcha": true
+ }
+]

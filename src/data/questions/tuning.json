@@ -1,0 +1,24 @@
+[
+ {
+  "q": "Grid search vs random search vs Bayesian optimisation?",
+  "a": "<p>Grid: tries every combination, exhaustive but wasteful. Random: samples combinations; with the same budget it tries more distinct values of each parameter, and since only a few parameters usually matter, it finds good values faster. Bayesian (Optuna TPE, Gaussian processes): learns from previous trials to propose promising ones, needing fewer trials; sequential and more complex.</p>"
+ },
+ {
+  "q": "Why does random search beat grid search with the same number of trials?",
+  "a": "<p>If one parameter matters and another doesn't, a 3 × 3 grid tests only 3 distinct values of the important one, while 9 random trials test 9 distinct values. See the visual on this page (Bergstra and Bengio, 2012).</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Parameters vs hyperparameters?",
+  "a": "<p>Parameters are learned from data during training (weights, split thresholds, leaf values). Hyperparameters are set before training and control learning (learning rate, depth, C, k, regularisation strength).</p>"
+ },
+ {
+  "q": "You tuned on the test set. What's wrong?",
+  "a": "<p>The test score is now optimistic, because you chose hyperparameters that happen to fit that test set. Tune on validation folds and use the test set exactly once at the end.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "How does Optuna pruning work?",
+  "a": "<p>Trials report intermediate scores (e.g. after each boosting round or fold). A pruner like median pruning stops a trial early if it's worse than the median of previous trials at the same step, saving compute for promising configurations.</p>"
+ }
+]

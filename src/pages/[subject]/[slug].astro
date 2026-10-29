@@ -1,0 +1,104 @@
+---
+import Base from '../../layouts/Base.astro';
+import { render } from 'astro:content';
+import { allTopics, slugOf, topicUrl, url, questionsFor, renderMath } from '../../lib/content';
+import { subjectById } from '../../data/subjects';
+
+export async function getStaticPaths() {
+  const topics = await allTopics();
+  return topics.map((t) => ({ params: { subject: t.data.subject, slug: slugOf(t) }, props: { id: t.id } }));
+}
+const topics = await allTopics();
+const t = topics.find((x) => x.id === Astro.props.id)!;
+const slug = slugOf(t);
+const subject = subjectById[t.data.subject];
+const { Content, headings } = await render(t);
+const h2 = headings.filter((h) => h.depth === 2);
+const qs = questionsFor(slug).map((q) => ({ ...q, a: renderMath(q.a) }));
+const sibs = topics.filter((x) => x.data.subject === t.data.subject);
+const i = sibs.findIndex((x) => x.id === t.id);
+const prev = sibs[i - 1], next = sibs[i + 1];
+const shortName = (s: string) => s.replace(/^\d+\.\s*/, '').split(/[:?,]| — /)[0].trim();
+---
+<Base title={t.data.title} description={t.data.summary}>
+  <div class="topic">
+    <article data-pagefind-body data-slug={slug} data-title={t.data.title} data-url={topicUrl(t)}>
+      <div class="crumbs"><a href={url('')}>Home</a><span>›</span><a href={url(`${t.data.subject}/`)}>{subject.name}</a><span>›</span><span>{t.data.group}</span></div>
+      <h1>{t.data.title}</h1>
+      <p class="lead">{t.data.summary}</p>
+      <div class="tmeta">
+        {t.data.minutes && <span>{t.data.minutes} min read</span>}
+        {qs.length > 0 && <a href="#questions">{qs.length} interview questions</a>}
+        <button class="toggle" id="doneBtn" type="button" aria-pressed="false">✓ Mark as revised</button>
+      </div>
+      <nav class="chips" aria-label="Sections">
+        {h2.map((h) => <a href={`#${h.slug}`}>{shortName(h.text)}</a>)}
+        {qs.length > 0 && <a href="#questions">Questions</a>}
+        <a href="#my-notes">My notes</a>
+      </nav>
+      <div class="prose">
+        <Content />
+      </div>
+
+      {qs.length > 0 && (
+        <section class="qsec" id="questions">
+          <div class="qhead"><h2>Most asked interview questions</h2><span>{qs.length} questions · {qs.filter((q) => q.gotcha).length} gotchas · answer out loud before opening</span></div>
+          {qs.map((q, n) => (
+            <details class="q" data-key={`${slug}|${q.q.slice(0, 60)}`}>
+              <summary><span class="qn">Q{n + 1}</span><span class="qt">{q.q}</span>{q.gotcha && <span class="chip gotcha">Gotcha</span>}<span class="chip status" hidden></span></summary>
+              <div class="ans prose">
+                <Fragment set:html={q.a} />
+                <div class="markrow"><button class="btn good" type="button" data-mark="k">Knew it</button><button class="btn bad" type="button" data-mark="r">Review again</button></div>
+              </div>
+            </details>
+          ))}
+        </section>
+      )}
+
+      <section class="qsec notes" id="my-notes" data-pagefind-ignore>
+        <div class="qhead"><h2>My notes</h2><span>Saved on this device</span></div>
+        <label class="sr-only" for="notesBox">Your notes for this topic</label>
+        <textarea id="notesBox" placeholder="Things you were asked, your own examples, numbers from your projects…"></textarea>
+      </section>
+
+      <nav class="pager" aria-label="Previous and next topic" data-pagefind-ignore>
+        {prev && <a href={topicUrl(prev)}><span>← Previous</span>{prev.data.short}</a>}
+        {next && <a class="next" href={topicUrl(next)}><span>Next →</span>{next.data.short}</a>}
+      </nav>
+    </article>
+    <aside class="otp" aria-label="On this page">
+      <h4>On this page</h4>
+      {h2.map((h) => <a href={`#${h.slug}`}>{shortName(h.text)}</a>)}
+      {qs.length > 0 && <a href="#questions">Interview questions</a>}
+      <a href="#my-notes">My notes</a>
+    </aside>
+  </div>
+  <script is:inline src={url('viz.js')}></script>
+  <script is:inline>
+    (function () {
+      const S = window.DSK, art = document.querySelector('article[data-slug]'), slug = art.dataset.slug;
+      S.set('dsk-last', { slug, title: art.dataset.title, url: art.dataset.url, at: Date.now() });
+      const done = S.get('dsk-done', {}), btn = document.getElementById('doneBtn');
+      const paint = () => { btn.setAttribute('aria-pressed', !!done[slug]); btn.textContent = done[slug] ? '✓ Revised' : '✓ Mark as revised'; };
+      btn.addEventListener('click', () => { done[slug] = !done[slug]; S.set('dsk-done', done); paint(); }); paint();
+      const cards = S.get('dsk-cards', {});
+      document.querySelectorAll('details.q').forEach((d) => {
+        const key = d.dataset.key, chip = d.querySelector('.chip.status');
+        const show = () => { const s = cards[key]; chip.hidden = !s; chip.className = 'chip status ' + (s === 'k' ? 'known' : 'review'); chip.textContent = s === 'k' ? 'Knew it' : 'Review'; };
+        d.querySelectorAll('[data-mark]').forEach((b) => b.addEventListener('click', () => { cards[key] = b.dataset.mark; S.set('dsk-cards', cards); show(); d.open = false; }));
+        show();
+      });
+      const notes = S.get('dsk-notes', {}), box = document.getElementById('notesBox');
+      box.value = notes[slug] || '';
+      let tm; box.addEventListener('input', () => { clearTimeout(tm); tm = setTimeout(() => { notes[slug] = box.value; S.set('dsk-notes', notes); }, 300); });
+      const links = [...document.querySelectorAll('.chips a, .otp a')];
+      const targets = [...new Set(links.map((a) => a.getAttribute('href')))].map((h) => document.getElementById(decodeURIComponent(h.slice(1)))).filter(Boolean);
+      const onScroll = () => {
+        let cur = targets[0]; for (const el of targets) if (el.getBoundingClientRect().top < 140) cur = el;
+        links.forEach((a) => a.classList.toggle('on', cur && a.getAttribute('href') === '#' + cur.id));
+        const chip = document.querySelector('.chips a.on'); if (chip) { const bar = chip.parentElement; const l = chip.offsetLeft - bar.clientWidth / 2 + chip.clientWidth / 2; if (Math.abs(bar.scrollLeft - l) > 40) bar.scrollTo({ left: l, behavior: 'smooth' }); }
+      };
+      let raf; addEventListener('scroll', () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(onScroll); }, { passive: true }); onScroll();
+    })();
+  </script>
+</Base>

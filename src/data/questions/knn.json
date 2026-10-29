@@ -1,0 +1,36 @@
+[
+ {
+  "q": "How do you choose k?",
+  "a": "<p>By cross-validation over a range (e.g. 1–50). Small k = low bias, high variance (noisy boundary); large k = smooth, high bias. A rule of thumb starting point is √n. Use odd k for binary classification to avoid ties.</p>"
+ },
+ {
+  "q": "What's the training accuracy of 1-NN?",
+  "a": "<p>100% (if there are no duplicate points with different labels), because each training point's nearest neighbour is itself. That's why training accuracy says nothing for KNN.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Why is KNN called a lazy learner?",
+  "a": "<p>It does no work at training time other than storing the data. All computation happens at prediction time, which makes prediction slow (\\(O(n p)\\) per query) and memory heavy.</p>"
+ },
+ {
+  "q": "What is the curse of dimensionality, and how does it affect KNN?",
+  "a": "<p>As dimensions grow, data becomes sparse and the distance to the nearest and farthest points become almost equal, so \"nearest\" stops meaning \"similar\". You'd need exponentially more data. Fix with feature selection, PCA, or learned embeddings.</p>"
+ },
+ {
+  "q": "Which distance metric should you use?",
+  "a": "<p>Euclidean for continuous scaled features; Manhattan when there are outliers or grid-like features; cosine for text and embeddings (direction matters, not length); Hamming for binary or categorical; Gower for mixed types.</p>"
+ },
+ {
+  "q": "K-means vs KNN?",
+  "a": "<p>Completely different. K-means is <strong>unsupervised clustering</strong>: K = number of clusters, finds centroids. KNN is <strong>supervised</strong> classification/regression: k = number of neighbours used to predict a label. They only share the letter k and the use of distances.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "How do you speed up KNN?",
+  "a": "<p>KD-trees or Ball trees for low dimensions (exact). Approximate nearest neighbour indexes for high dimensions: HNSW, IVF, product quantisation (FAISS, Annoy, ScaNN). Same technology as vector databases in RAG.</p>"
+ },
+ {
+  "q": "How does KNN imputation work?",
+  "a": "<p>For a row with a missing value, find its k nearest rows using the features that are present, and fill the gap with their mean (or mode). It preserves relationships better than mean imputation, but is slow on large data and needs scaling.</p>"
+ }
+]

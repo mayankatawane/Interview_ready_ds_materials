@@ -1,0 +1,28 @@
+[
+ {
+  "q": "Explain Adam.",
+  "a": "<p>Adam keeps an exponential moving average of gradients (momentum, β₁ = 0.9) and of squared gradients (adaptive scaling, β₂ = 0.999), corrects both for their zero initialisation (bias correction), and updates each weight by \\(\\eta\\,\\hat m/(\\sqrt{\\hat v}+\\epsilon)\\). Parameters with consistently large gradients get smaller effective steps.</p>"
+ },
+ {
+  "q": "What's the difference between Adam with L2 and AdamW?",
+  "a": "<p>In Adam, L2 added to the loss passes through the adaptive denominator, so weights with large gradient history get less regularisation. AdamW decouples weight decay, subtracting \\(\\eta\\lambda w\\) directly from the weights. It regularises consistently and is the default for Transformers.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "What does momentum do?",
+  "a": "<p>It accumulates a velocity \\(v = \\beta v + g\\) and steps along it. Consistent gradient directions build speed; oscillating components cancel, so it moves faster along narrow valleys and damps zig-zagging.</p>"
+ },
+ {
+  "q": "Why use learning-rate warmup for Transformers?",
+  "a": "<p>At the start, Adam's second-moment estimates are based on very few gradients and are noisy, and the model is poorly scaled, so a full learning rate can cause unstable, huge updates. Increasing the LR linearly over the first steps avoids early divergence, especially with post-LN architectures.</p>"
+ },
+ {
+  "q": "Is Adam always better than SGD?",
+  "a": "<p>Adam usually converges faster and needs less tuning. Well-tuned SGD with momentum and a good schedule can generalise slightly better in vision. For Transformers and LLMs, AdamW is standard.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "How do batch size and learning rate interact?",
+  "a": "<p>Larger batches give lower-noise gradients, so you can usually raise the learning rate roughly in proportion (linear scaling rule, with warmup). Very large batches can generalise worse. If memory is the constraint, use gradient accumulation.</p>"
+ }
+]

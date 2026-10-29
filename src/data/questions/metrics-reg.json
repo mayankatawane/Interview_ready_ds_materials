@@ -1,0 +1,24 @@
+[
+ {
+  "q": "MAE vs RMSE: which and when?",
+  "a": "<p>MAE: average absolute miss in target units, robust to outliers, optimal prediction is the median. RMSE: squares errors, so large misses dominate; optimal prediction is the mean. Use RMSE when big errors are disproportionately costly; MAE when you want typical error and have outliers. RMSE ≥ MAE always; a big gap means some large errors.</p>"
+ },
+ {
+  "q": "What are the problems with MAPE?",
+  "a": "<p>Undefined or explodes when actuals are zero or tiny; asymmetric (over-forecasts can give unbounded %, under-forecasts are capped at 100%), so optimising it biases forecasts low; small items dominate. Use WAPE, sMAPE, or MASE.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "When would you use RMSLE?",
+  "a": "<p>Skewed targets spanning orders of magnitude (prices, counts), when relative error matters more than absolute, and when under-prediction should be penalised a bit more than over-prediction. It's RMSE on log1p of the values.</p>"
+ },
+ {
+  "q": "Which loss gives median predictions and which gives mean predictions?",
+  "a": "<p>Absolute error (L1) → median. Squared error (L2) → mean. Quantile (pinball) loss with τ → the τ-th quantile, e.g. τ = 0.9 for a P90 forecast.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "What does R² actually tell you?",
+  "a": "<p>The share of variance in y explained by the model compared with predicting the mean. It doesn't say whether predictions are unbiased or errors acceptable in business units, and it can be high with a useless model on trending data. Report it with MAE/RMSE.</p>"
+ }
+]

@@ -1,0 +1,23 @@
+[
+ {
+  "q": "What are vanishing and exploding gradients and how do you fix them?",
+  "a": "<p>Backprop multiplies per-layer factors, so gradients shrink (vanish) or grow (explode) exponentially with depth or sequence length. Vanishing: early layers stop learning. Exploding: NaN losses. Fixes: ReLU-family activations, He/Xavier initialisation, BatchNorm/LayerNorm, residual connections, LSTM/GRU for sequences, gradient clipping and lower learning rates for explosion.</p>"
+ },
+ {
+  "q": "Why can't you initialise all weights to zero?",
+  "a": "<p>All neurons in a layer would compute the same output and get the same gradient, so they stay identical forever: symmetry is never broken and the layer acts like one neuron. Weights need random initialisation (biases may be zero).</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Xavier vs He initialisation?",
+  "a": "<p>Both scale random weights to keep activation variance stable across layers. Xavier/Glorot: Var(w) = 2/(n_in + n_out), suited to tanh/sigmoid. He/Kaiming: Var(w) = 2/n_in, suited to ReLU, which zeroes about half its inputs and therefore needs twice the variance.</p>"
+ },
+ {
+  "q": "How do residual connections help training?",
+  "a": "<p>With \\(y = x + F(x)\\), the derivative is \\(1 + F'(x)\\), so gradients always have an identity path through the block and don't vanish through depth. Each block only needs to learn a correction. This made 100+ layer ResNets and deep Transformers trainable.</p>"
+ },
+ {
+  "q": "What is gradient clipping?",
+  "a": "<p>If the gradient norm exceeds a threshold c, rescale it: \\(g \\leftarrow c\\,g/\\|g\\|\\). It prevents single huge updates from exploding gradients. Standard in RNNs and LLM training (c ≈ 1.0).</p>"
+ }
+]

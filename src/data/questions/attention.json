@@ -1,0 +1,36 @@
+[
+ {
+  "q": "Explain self-attention with Q, K, V.",
+  "a": "<p>Each token is projected into a query (what it looks for), key (what it offers to be matched on) and value (the information it provides). Scores = QKᵀ/√d_k, softmax per row gives weights, and the output is the weighted sum of values. Each token's new representation mixes in the context it found relevant.</p>"
+ },
+ {
+  "q": "Why divide by √d_k?",
+  "a": "<p>Dot products of d_k-dimensional vectors with unit-variance components have variance d_k, so for large d_k scores are large and softmax becomes nearly one-hot, with vanishing gradients. Dividing by √d_k restores unit variance and keeps training stable.</p>"
+ },
+ {
+  "q": "What is a causal mask and why is it needed?",
+  "a": "<p>It blocks each position from attending to later positions (scores set to −∞ before softmax). In next-token training the model must not see the token it is predicting; the mask lets all positions train in parallel without cheating.</p>"
+ },
+ {
+  "q": "Why multiple heads?",
+  "a": "<p>Each head has its own projections and can learn a different type of relationship in its own subspace (local syntax, coreference, long-range links). Concatenating heads gives richer representations at roughly the same cost as one full-width head.</p>"
+ },
+ {
+  "q": "What are MQA and GQA and why do they matter?",
+  "a": "<p>Multi-query attention shares one key/value head across all query heads; grouped-query attention shares each K/V head within a group. Fewer K/V heads shrink the KV cache and memory bandwidth during generation, making inference faster and cheaper with little quality loss. LLaMA-2-70B and Mistral use GQA.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "What is the computational complexity of self-attention?",
+  "a": "<p>O(n² · d) time and O(n²) memory for the score matrix, with n the sequence length. Doubling context length roughly quadruples attention cost. FlashAttention avoids materialising the n × n matrix; sparse/sliding-window attention reduce the quadratic term.</p>"
+ },
+ {
+  "q": "Are attention weights explanations of the model's reasoning?",
+  "a": "<p>Not reliably. They show how values were mixed in one head of one layer, but many heads and layers interact, and the FFN and residual stream also carry information. Attention maps are a hint, not a faithful explanation.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Self-attention vs cross-attention?",
+  "a": "<p>Self-attention: Q, K and V come from the same sequence. Cross-attention: queries from one sequence (decoder) and keys/values from another (encoder output, or image features), used in encoder–decoder and multimodal models.</p>"
+ }
+]

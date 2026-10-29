@@ -1,0 +1,32 @@
+[
+ {
+  "q": "How do you evaluate a RAG system?",
+  "a": "<p>Separately for retrieval (recall@k, precision@k, MRR, NDCG against gold passages) and generation (faithfulness, answer relevancy, context precision and recall, correctness vs reference), on a curated golden set run on every change, plus human review and production feedback. RAGAS or a calibrated LLM judge automates scoring; LangSmith traces each step.</p>"
+ },
+ {
+  "q": "What is faithfulness?",
+  "a": "<p>The share of claims in the answer that are supported by the retrieved context. 3 of 4 claims supported → 0.75. It measures groundedness, not correctness.</p>"
+ },
+ {
+  "q": "High faithfulness but users say answers are wrong. How?",
+  "a": "<p>The answer faithfully reflects the wrong or outdated context. Check context recall and correctness against references; look at retrieval (stale documents, missing filters on date/version) and document governance.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "How do you reduce hallucinations?",
+  "a": "<p>Improve retrieval first; instruct to answer only from context and say \"I don't know\"; require citations; abstain on low retrieval scores; low temperature; put the best chunks first; run a groundedness check before returning; and evaluate continuously.</p>"
+ },
+ {
+  "q": "What is 'lost in the middle'?",
+  "a": "<p>LLMs tend to use information at the start and end of a long context better than information in the middle. Keep the context short and place the most relevant chunks first (or last).</p>"
+ },
+ {
+  "q": "How do you make LLM-as-judge reliable?",
+  "a": "<p>Clear rubric, give it the question, context, answer and reference, ask for reasoning then a score, prefer pairwise comparisons, randomise order to avoid position bias, check agreement with human labels on a sample, and use a different or stronger model than the one being judged.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "How do you build a golden evaluation set?",
+  "a": "<p>50–300 questions from real users or experts with reference answers and source passages, covering easy, hard, multi-hop, table, out-of-scope and adversarial cases. Bootstrap with LLM-generated questions from the documents and have experts review. Version it and run it in CI.</p>"
+ }
+]

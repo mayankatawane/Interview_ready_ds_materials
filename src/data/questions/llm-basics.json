@@ -1,0 +1,33 @@
+[
+ {
+  "q": "What is an LLM, in one minute?",
+  "a": "<p>A decoder-only Transformer trained on huge text corpora to predict the next token. Text is tokenized, embedded, processed by stacked attention + feed-forward blocks, and the last position's output is turned into a probability distribution over the vocabulary. Generation repeats this token by token. Instruction tuning and preference tuning make it a helpful assistant.</p>"
+ },
+ {
+  "q": "Is a token the same as a word?",
+  "a": "<p>No. Tokens are sub-word units: whole words, word pieces, punctuation or whitespace. English averages about 0.75 words per token, but code, numbers and many Indian languages need more tokens per word. Always measure with the model's tokenizer.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Explain Byte-Pair Encoding.",
+  "a": "<p>Start from characters (or bytes). Repeatedly find the most frequent adjacent pair in the corpus and merge it into a new token, until the vocabulary reaches the target size. At inference, apply the learned merges in order. Frequent words become single tokens; rare words split into pieces, so nothing is out-of-vocabulary.</p>"
+ },
+ {
+  "q": "Why are LLMs bad at counting letters in a word?",
+  "a": "<p>They see tokens, not characters. \"strawberry\" may be one or two tokens, so the model has no direct view of individual letters and must rely on memorised spelling patterns.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Why does tokenization matter for cost and RAG?",
+  "a": "<p>API pricing, context limits and rate limits are counted in tokens. RAG chunk sizes must be measured in the embedding model's tokens to stay under its input limit, and the final prompt must fit the LLM's context window with room for the answer.</p>"
+ },
+ {
+  "q": "Encoder-only vs decoder-only vs encoder–decoder: which for what?",
+  "a": "<p>Encoder-only (BERT): bidirectional, best for classification, NER, embeddings and reranking. Decoder-only (GPT, LLaMA, Claude): causal, best for generation, chat, agents. Encoder–decoder (T5, BART): input-to-output tasks like translation and summarisation.</p>"
+ },
+ {
+  "q": "Why do LLMs hallucinate?",
+  "a": "<p>They are trained to produce plausible next tokens, not to verify facts. When knowledge is missing, rare or ambiguous, the most plausible continuation can be wrong but fluent. Training also rewards always answering. RAG, citations, abstention instructions and verification reduce it.</p>",
+  "gotcha": true
+ }
+]

@@ -1,0 +1,43 @@
+[
+ {
+  "q": "What's the difference between overfitting and underfitting, and how do you handle each?",
+  "a": "<p><strong>Overfitting</strong>: low training error, much higher validation error. The model learned noise (high variance). Fix with more data, regularisation (L1/L2, dropout), early stopping, simpler model, fewer features, bagging, limiting tree depth.</p><p><strong>Underfitting</strong>: both errors high (high bias). Fix with more informative features, a more flexible model, less regularisation, longer training.</p><p>Diagnose with train-vs-validation scores or learning curves. This exact question was asked; the candidate who skipped it scored 4/10.</p>"
+ },
+ {
+  "q": "Explain the bias-variance trade-off.",
+  "a": "<p>Expected test error = bias² + variance + irreducible noise. Simple models have high bias (systematically wrong) and low variance (stable across samples). Flexible models have low bias but high variance (change a lot with a different sample). Increasing complexity moves error from bias to variance; the best model minimises the sum. Example: polynomial degree 1 underfits a sine curve, degree 12 wiggles through every training point.</p>"
+ },
+ {
+  "q": "Your training accuracy is 99% and validation is 70%. Is it always overfitting?",
+  "a": "<p>Usually, but check two other causes first: <strong>leakage</strong> into training features (e.g. a feature computed with future information that is cleaner in train), and a <strong>distribution shift</strong> between train and validation (different time period, different customers). Adversarial validation and a time-based split help tell them apart.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Why does L1 give sparse weights but L2 doesn't?",
+  "a": "<p><strong>Geometry</strong>: the L1 constraint region is a diamond with corners on the axes. The loss contours usually touch it first at a corner, where some weights are exactly zero. The L2 region is a circle with no corners, so the touching point usually has all weights non-zero.</p><p><strong>Calculus</strong>: the L1 penalty's gradient is a constant ±λ even when the weight is tiny, so it pushes it all the way to 0. The L2 gradient 2λw shrinks as w shrinks, so it never quite reaches 0.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "When would you use Ridge vs Lasso vs Elastic Net?",
+  "a": "<p>Ridge: many small useful features, multicollinearity, want stable coefficients. Lasso: you believe few features matter and want automatic selection. Elastic Net: many correlated features and you want sparsity; Lasso alone would pick one of a correlated group arbitrarily, Elastic Net keeps the group.</p>"
+ },
+ {
+  "q": "Does regularisation reduce bias or variance?",
+  "a": "<p>It <strong>reduces variance and increases bias</strong>. With λ → ∞ all weights go to zero, giving a constant prediction: maximum bias. Good λ is chosen by cross-validation.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Why must you scale features before L1/L2 regularisation?",
+  "a": "<p>The penalty is on the raw coefficient size. A feature measured in rupees gets a tiny coefficient and a feature in lakhs gets a large one for the same effect, so the penalty would hit them unequally. Standardising puts all coefficients on the same footing.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Does more data always help?",
+  "a": "<p>It helps a high-variance (overfitting) model. A high-bias model has already plateaued; extra data won't fix it, you need better features or a more flexible model. A learning curve shows which case you're in. More data also doesn't help if it is noisy or from a different distribution.</p>"
+ },
+ {
+  "q": "In sklearn LogisticRegression, does increasing C increase or decrease regularisation?",
+  "a": "<p>Decrease. C = 1/λ. Small C = strong regularisation, simpler model. Same for SVM.</p>",
+  "gotcha": true
+ }
+]

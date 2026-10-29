@@ -1,0 +1,23 @@
+[
+ {
+  "q": "How do you choose chunk size?",
+  "a": "<p>Start around 300–800 tokens with 10–20% overlap based on document type, then measure: build question → gold passage pairs and compare retrieval recall@k and answer quality across a few sizes. Stay within the embedding model's input limit.</p>"
+ },
+ {
+  "q": "What chunking strategies do you know?",
+  "a": "<p>Fixed-size with overlap, recursive (paragraph → sentence → word), structure-aware (headings, sections, tables), semantic (split where topic similarity drops), parent–child / small-to-big, sentence-window, and contextual chunking (prepend document context to each chunk).</p>"
+ },
+ {
+  "q": "Why not use very large chunks?",
+  "a": "<p>One vector for a large chunk averages many topics, so similarity to a specific question weakens and retrieval precision drops; fewer chunks fit the prompt; more irrelevant tokens raise cost and distract the model. Parent–child retrieval gives small-chunk precision with large-chunk context.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Why use overlap?",
+  "a": "<p>So information that spans a boundary (a sentence split between two chunks) appears complete in at least one chunk. Too much overlap causes duplicate results and a bigger index.</p>"
+ },
+ {
+  "q": "What is parent–child (small-to-big) retrieval?",
+  "a": "<p>Index small child chunks for precise matching, but when one matches, return its larger parent section (or neighbouring chunks) to the LLM so it has enough context to answer.</p>"
+ }
+]

@@ -1,0 +1,23 @@
+[
+ {
+  "q": "Your loss becomes NaN. What do you check?",
+  "a": "<p>Lower the learning rate; add gradient clipping; check inputs and labels for NaN/inf; use logit-based losses (no log(0)); check divisions and normalisation by zero variance; with FP16, use loss scaling or switch to BF16. Then re-run on a small batch with anomaly detection on.</p>"
+ },
+ {
+  "q": "Why overfit a single batch first?",
+  "a": "<p>It's a quick sanity test: a correct model and pipeline should drive training loss on a handful of examples to near zero. If it can't, there's a bug (labels misaligned, wrong loss, frozen parameters, learning rate way off) and scaling up would waste time.</p>"
+ },
+ {
+  "q": "Validation loss is lower than training loss. Is something wrong?",
+  "a": "<p>Not necessarily. Dropout and augmentation are active during training but off during validation, and training loss is averaged over an epoch while the model improves. But also check that the validation set isn't easier or leaking from train.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "What is mixed-precision training?",
+  "a": "<p>Doing most computation in 16-bit (FP16 or BF16) while keeping a 32-bit master copy of weights. About 2× faster and half the memory on modern GPUs. FP16 needs loss scaling to avoid underflow; BF16 has FP32's exponent range so usually doesn't.</p>"
+ },
+ {
+  "q": "How do you train a model that doesn't fit in GPU memory?",
+  "a": "<p>Smaller batch + gradient accumulation, mixed precision, gradient checkpointing, parameter-efficient fine-tuning (LoRA/QLoRA), quantisation, and sharding across GPUs (FSDP, DeepSpeed ZeRO) or model/pipeline parallelism.</p>"
+ }
+]

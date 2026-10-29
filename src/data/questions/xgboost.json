@@ -1,0 +1,68 @@
+[
+ {
+  "q": "How is XGBoost different from standard gradient boosting?",
+  "a": "<p>Regularised objective (γ per leaf, λ/α on leaf weights), second-order Taylor approximation (uses gradient and hessian), closed-form leaf weights \\(-G/(H+\\lambda)\\), gain-based pruning with γ, sparsity-aware missing value handling, histogram / weighted quantile sketch split finding, row and column subsampling, parallel and cache-aware computation, built-in early stopping and monotonic constraints.</p>"
+ },
+ {
+  "q": "How does XGBoost handle missing values?",
+  "a": "<p>At each split it evaluates sending all missing rows to the left child and then to the right child, and picks the direction with higher gain. That default direction is stored in the node and used at prediction time. So missingness itself can carry signal, and you don't need to impute.</p>"
+ },
+ {
+  "q": "Why does XGBoost use the second derivative?",
+  "a": "<p>The second-order Taylor expansion of the loss gives a quadratic, which has a closed-form minimum: the leaf weight \\(-G/(H+\\lambda)\\). That's a Newton step: it uses curvature to size the step correctly, converges faster than first-order gradient steps, and lets any twice-differentiable loss plug into the same split and leaf formulas.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Explain gamma, lambda and alpha.",
+  "a": "<p><strong>gamma</strong> (min_split_loss): minimum gain needed to make a split; prunes weak splits. <strong>lambda</strong>: L2 penalty on leaf weights; shrinks leaf values, especially for small leaves (it's added to H in the denominator). <strong>alpha</strong>: L1 penalty on leaf weights; can make leaf values exactly zero, useful with many features.</p>"
+ },
+ {
+  "q": "What does min_child_weight mean?",
+  "a": "<p>The minimum sum of hessians allowed in a child. For squared error h = 1, so it's the minimum number of rows. For log loss h = p(1−p), which is small for confidently predicted rows, so a leaf of 100 confident rows can have a tiny hessian sum and be rejected. Higher values make the model more conservative.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "What are XGBoost's feature importance types?",
+  "a": "<p><strong>weight</strong>: number of splits using the feature. <strong>gain</strong>: average loss reduction from those splits (default for the sklearn API, usually most meaningful). <strong>cover</strong>: average number of rows (hessian sum) affected. total_gain and total_cover are the sums. They can rank features differently; use SHAP for consistent explanations.</p>"
+ },
+ {
+  "q": "How do you handle class imbalance in XGBoost?",
+  "a": "<p>Set <code>scale_pos_weight</code> = #negatives / #positives, use <code>eval_metric=\"aucpr\"</code>, tune the threshold, and for extreme imbalance try <code>max_delta_step</code> 1–10 to stabilise updates. If you need calibrated probabilities after weighting, recalibrate.</p>"
+ },
+ {
+  "q": "Does XGBoost need feature scaling?",
+  "a": "<p>No. It's tree-based; splits depend only on the order of values. (The linear booster <code>gblinear</code> is an exception.)</p>",
+  "gotcha": true
+ },
+ {
+  "q": "What's the difference between the objective and the eval_metric?",
+  "a": "<p>The objective (e.g. <code>binary:logistic</code>) is the loss being optimised and must be differentiable. The eval metric (e.g. AUC, aucpr) is what you monitor on validation and use for early stopping; it doesn't have to be differentiable.</p>"
+ },
+ {
+  "q": "How does early stopping work?",
+  "a": "<p>You pass a validation set; after each round XGBoost computes the eval metric. If it hasn't improved for <code>early_stopping_rounds</code> rounds, training stops and <code>best_iteration</code> is kept. Never use the test set for this, or your test score will be optimistic.</p>"
+ },
+ {
+  "q": "How is XGBoost parallel if boosting is sequential?",
+  "a": "<p>Trees are built one after another, but inside each tree the split search is parallel: features (and histogram bins) are evaluated on different threads using a pre-sorted, compressed column block structure.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Your XGBoost model overfits. What do you change?",
+  "a": "<p>Lower <code>max_depth</code>, raise <code>min_child_weight</code> and <code>gamma</code>, increase <code>reg_lambda</code>/<code>reg_alpha</code>, use <code>subsample</code> and <code>colsample_bytree</code> 0.6–0.8, lower the learning rate with early stopping, and remove leaky or noisy features.</p>"
+ },
+ {
+  "q": "How does XGBoost handle categorical features?",
+  "a": "<p>Historically it didn't: you had to one-hot, ordinal or target encode. Recent versions support native categoricals with <code>enable_categorical=True</code> and pandas category dtype, using partition-based splits. Many teams still encode explicitly or switch to CatBoost/LightGBM for heavy categorical data.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Is XGBoost sensitive to outliers?",
+  "a": "<p>In features: not much, splits only use order. In the target: yes, with squared error, outliers create large gradients and the model chases them. Use Huber / pseudo-Huber loss (<code>reg:pseudohubererror</code>), cap targets, or model a transformed target.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Compute a leaf weight: 3 rows with residuals 4, 6, 8, squared loss, λ = 1.",
+  "a": "<p>g = −residual, so G = −18; h = 1 each, so H = 3. Leaf weight = −G/(H+λ) = 18/4 = 4.5. Without λ it would be 6 (the plain mean residual). Then the prediction moves by η × 4.5.</p>"
+ }
+]

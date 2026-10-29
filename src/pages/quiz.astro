@@ -1,0 +1,37 @@
+---
+import Base from '../layouts/Base.astro';
+import quiz from '../data/quiz.json';
+import { SUBJECTS } from '../data/subjects';
+const subs = SUBJECTS.filter((s) => quiz.some((q: any) => q.s === s.id)).map((s) => [s.id, s.name]);
+---
+<Base title="Quiz" active="quiz">
+  <h1>Rapid-fire quiz</h1>
+  <p class="lead">Quick multiple-choice checks. Each answer explains why.</p>
+  <div class="filters" id="qsub"></div>
+  <p id="score" style="font-family:var(--f-mono)">Score: 0 / 0</p>
+  <div id="quiz"></div>
+  <button class="btn" id="again" type="button">Start again</button>
+  <script type="application/json" id="quizdata" set:html={JSON.stringify({ quiz, subs })}></script>
+  <script is:inline>
+    (function () {
+      const { quiz, subs } = JSON.parse(document.getElementById('quizdata').textContent);
+      let subj = 'all';
+      const bar = document.getElementById('qsub'), root = document.getElementById('quiz'), sc = document.getElementById('score');
+      function build() {
+        bar.innerHTML = [['all', 'All subjects'], ...subs].map(([v, l]) => `<button type="button" data-s="${v}" aria-pressed="${subj === v}">${l}</button>`).join('');
+        bar.querySelectorAll('button').forEach((b) => b.onclick = () => { subj = b.dataset.s; build(); });
+        const Q = quiz.filter((q) => subj === 'all' || q.s === subj).sort(() => Math.random() - 0.5);
+        let right = 0, done = 0; sc.textContent = `Score: 0 / 0 · ${Q.length} questions`; root.innerHTML = '';
+        Q.forEach((q, i) => {
+          const card = document.createElement('div'); card.className = 'qcard';
+          const p = document.createElement('p'); p.textContent = `${i + 1}. ${q.q}`; card.appendChild(p);
+          const opts = document.createElement('div'); opts.className = 'opts';
+          const why = document.createElement('div'); why.className = 'why'; why.textContent = q.why; why.hidden = true;
+          q.o.forEach((o, j) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = o; b.onclick = () => { done++; if (j === q.c) right++; [...opts.children].forEach((x, k) => { x.disabled = true; if (k === q.c) x.classList.add('right'); else if (k === j) x.classList.add('wrong'); }); why.hidden = false; sc.textContent = `Score: ${right} / ${done} · ${Q.length} questions`; }; opts.appendChild(b); });
+          card.appendChild(opts); card.appendChild(why); root.appendChild(card);
+        });
+      }
+      document.getElementById('again').onclick = build; build();
+    })();
+  </script>
+</Base>

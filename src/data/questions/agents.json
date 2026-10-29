@@ -1,0 +1,36 @@
+[
+ {
+  "q": "What is an AI agent?",
+  "a": "<p>An LLM that runs in a loop: it reasons about the goal, chooses a tool or action, observes the result and repeats until done. The application executes the tools; the model only proposes calls.</p>"
+ },
+ {
+  "q": "How does function / tool calling work?",
+  "a": "<p>You pass tool definitions (name, description, JSON schema). The model returns a structured call with arguments instead of text; your code validates and executes it, returns the result as a message, and the model continues.</p>"
+ },
+ {
+  "q": "Why LangGraph over a simple LangChain chain?",
+  "a": "<p>LangGraph models the application as a state graph with typed state, nodes, conditional edges and cycles, so loops, retries, routing and multi-agent setups are explicit. It adds checkpointing (memory, resume, time travel) and human-in-the-loop interrupts, which production agents need.</p>"
+ },
+ {
+  "q": "Workflow or agent: how do you choose?",
+  "a": "<p>If the steps are known, use a workflow: predictable, cheaper, easier to test. Use an agent only where the sequence of actions genuinely depends on intermediate results. Many good systems are workflows with a router or a small agentic step.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "What is the ReAct pattern?",
+  "a": "<p>Reason + Act: the model alternates a thought, an action (tool call) and an observation (tool result), building up information step by step before giving a final answer.</p>"
+ },
+ {
+  "q": "What is MCP?",
+  "a": "<p>Model Context Protocol: an open standard for exposing tools, data resources and prompts to LLM applications through MCP servers. Any compatible client can use any server, replacing one-off integrations.</p>"
+ },
+ {
+  "q": "How do you make agents reliable in production?",
+  "a": "<p>Few well-described tools with strict schemas, argument validation, iteration/time/cost limits, loop detection, least-privilege credentials, human approval for risky actions, fallbacks on tool errors, full tracing, and evaluation of trajectories (right tool, right arguments) as well as final answers.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "How do you add memory to an agent?",
+  "a": "<p>Short-term: keep the conversation in the graph state, trimming or summarising older turns. Long-term: write durable facts to a store (vector DB or key-value) and retrieve them when relevant. LangGraph checkpointers persist state per thread.</p>"
+ }
+]

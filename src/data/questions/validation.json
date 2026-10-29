@@ -1,0 +1,37 @@
+[
+ {
+  "q": "Why use stratified K-fold?",
+  "a": "<p>It keeps the class ratio the same in every fold. With rare positives, a plain random fold might contain very few or none, making scores unstable or undefined.</p>"
+ },
+ {
+  "q": "Why is random K-fold wrong for time series?",
+  "a": "<p>It trains on future rows and validates on past ones, so lag and rolling features leak the future and the score is optimistic. Use forward-chaining splits (TimeSeriesSplit), optionally with a gap equal to the forecast horizon, plus an out-of-time holdout.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "What is out-of-time validation?",
+  "a": "<p>Hold out the most recent period entirely (e.g. last 3 months) and evaluate on it after all development. It tests whether the model holds up as the population and economy change. Standard in credit risk alongside in-time validation.</p>"
+ },
+ {
+  "q": "What is nested cross-validation and when do you need it?",
+  "a": "<p>Inner CV loop tunes hyperparameters; outer loop evaluates the whole tuning procedure on folds it never saw. Needed for an unbiased performance estimate on small data, because picking the best of many configurations on the same folds is optimistic.</p>"
+ },
+ {
+  "q": "Same customer has 20 rows. What split do you use?",
+  "a": "<p>GroupKFold (or StratifiedGroupKFold) with customer ID as the group, so a customer's rows are all in train or all in validation. Otherwise the model memorises customer-specific patterns and validation looks too good.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "What is PSI and how do you use it?",
+  "a": "<p>Population Stability Index compares the distribution of a variable (or score) now vs at development: \\(\\sum (A-E)\\ln(A/E)\\) over bins. &lt; 0.1 stable, 0.1–0.25 monitor, &gt; 0.25 significant shift: investigate, recalibrate or retrain.</p>"
+ },
+ {
+  "q": "What is adversarial validation?",
+  "a": "<p>Label training rows 0 and test rows 1, train a classifier to tell them apart. AUC near 0.5 means the distributions match. High AUC means drift; the most important features show which variables shifted, and you can build a validation set from the training rows most similar to test.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Data drift vs concept drift?",
+  "a": "<p>Data (covariate) drift: the input distribution changes (new customer mix), P(X) changes. Concept drift: the relationship changes (same profile now defaults more after a rate hike), P(y | X) changes. Detect data drift with PSI/KS on features; concept drift needs labels and performance monitoring.</p>"
+ }
+]

@@ -1,0 +1,50 @@
+[
+ {
+  "q": "What are support vectors?",
+  "a": "<p>The training points on or inside the margin (or misclassified). They are the only points with non-zero α in the dual, so they alone define the boundary. Remove any other point and the model doesn't change.</p>"
+ },
+ {
+  "q": "What does C do?",
+  "a": "<p>C is the penalty per margin violation. Small C: wide margin, more violations allowed, more support vectors, smoother and possibly underfit. Large C: tries to classify every training point correctly, narrow margin, can overfit. Choose by cross-validation.</p>"
+ },
+ {
+  "q": "What does gamma do in an RBF kernel?",
+  "a": "<p>γ sets how far one point's influence reaches: \\(K = e^{-\\gamma\\|x-x'\\|^2}\\). Small γ: wide influence, smooth boundary (can underfit). Large γ: influence only very close by, boundary wraps tightly around points (overfits). Tune C and γ together on a log grid.</p>"
+ },
+ {
+  "q": "Explain the kernel trick.",
+  "a": "<p>In the dual formulation the data appears only through dot products \\(x_i^\\top x_j\\). Replace them with a kernel \\(K(x_i,x_j) = \\phi(x_i)^\\top\\phi(x_j)\\) and you get a linear separator in a high (even infinite) dimensional feature space without computing φ. Example: \\(K = (x^\\top x')^2\\) corresponds to all pairwise products of features.</p>"
+ },
+ {
+  "q": "Why must you scale features for SVM?",
+  "a": "<p>The margin and the RBF kernel both use distances. A feature in large units (salary) dominates one in small units (age), so the margin is effectively measured on salary alone. Standardise first.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Does SVM output probabilities?",
+  "a": "<p>No, it outputs a signed distance to the boundary. sklearn's <code>probability=True</code> fits Platt scaling (a logistic regression on the scores) with internal 5-fold CV, which is slow and can disagree with <code>predict</code>. Use <code>decision_function</code> for ranking, or calibrate separately.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Why are SVMs slow on large datasets?",
+  "a": "<p>Kernel SVM needs the n × n kernel matrix and training scales between \\(O(n^2)\\) and \\(O(n^3)\\). Above roughly 100k rows use linear SVM (<code>LinearSVC</code>, SGD), kernel approximations (Nystroem, random Fourier features), or gradient boosting.</p>"
+ },
+ {
+  "q": "Hard margin vs soft margin?",
+  "a": "<p>Hard margin requires perfect separation, so it fails on overlapping data and is very sensitive to outliers. Soft margin adds slack variables and the penalty C, allowing some violations. Practical SVMs are soft margin.</p>"
+ },
+ {
+  "q": "How does SVM do multiclass?",
+  "a": "<p>SVMs are binary. sklearn's <code>SVC</code> uses one-vs-one (K(K−1)/2 classifiers, majority vote); <code>LinearSVC</code> uses one-vs-rest.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "What is SVR?",
+  "a": "<p>Support Vector Regression fits a function with an ε-insensitive tube: errors smaller than ε cost nothing, larger ones cost linearly. Points outside the tube are the support vectors. Parameters: C, ε, kernel.</p>"
+ },
+ {
+  "q": "Is SVM sensitive to outliers?",
+  "a": "<p>Less than you might think with soft margin and moderate C, because hinge loss grows linearly, not quadratically. But an outlier on the wrong side becomes a support vector and, with large C, can pull the boundary noticeably.</p>",
+  "gotcha": true
+ }
+]

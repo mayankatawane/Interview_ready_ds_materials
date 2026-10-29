@@ -1,0 +1,32 @@
+[
+ {
+  "q": "What's inside one Transformer block?",
+  "a": "<p>Multi-head self-attention and a position-wise feed-forward network, each wrapped with a residual connection and layer normalisation (pre-LN in most modern LLMs). Attention mixes information across tokens; the FFN transforms each token's vector.</p>"
+ },
+ {
+  "q": "How do Transformers know word order?",
+  "a": "<p>Through positional information: sinusoidal or learned position vectors added to embeddings (original Transformer, BERT, GPT-2), or rotary position embeddings (RoPE) that rotate queries and keys so attention depends on relative distance (LLaMA, Mistral), or ALiBi biases.</p>"
+ },
+ {
+  "q": "What is the KV cache?",
+  "a": "<p>During generation, keys and values of past tokens don't change, so each layer stores them and only computes q, k, v for the new token. It turns per-token cost from re-processing the whole prefix into one step, but uses memory: about 0.5 MB per token for LLaMA-2-7B in FP16.</p>"
+ },
+ {
+  "q": "Why is LLM decoding memory-bound rather than compute-bound?",
+  "a": "<p>Each new token needs only a little computation but must read all model weights and the KV cache from GPU memory. Memory bandwidth, not FLOPs, limits speed. Batching many requests, quantisation and GQA help.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Pre-LN vs post-LN?",
+  "a": "<p>Post-LN normalises after adding the residual (original Transformer) and is harder to train deep without warmup. Pre-LN normalises the sub-layer input and keeps a clean residual path, which is more stable; most modern LLMs use pre-norm (often RMSNorm).</p>"
+ },
+ {
+  "q": "Where are most of a Transformer's parameters?",
+  "a": "<p>In the feed-forward networks: with a 4× expansion they have about 8d² parameters per block vs 4d² for attention, so roughly two-thirds of the non-embedding parameters.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Why did decoder-only models become the default for LLMs?",
+  "a": "<p>One simple objective (next-token prediction) that uses all text and scales smoothly, natural generation, strong in-context learning, and the ability to handle classification or extraction by generating the answer. KV caching also makes generation efficient.</p>"
+ }
+]

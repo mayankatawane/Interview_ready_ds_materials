@@ -1,0 +1,27 @@
+[
+ {
+  "q": "When would you fine-tune instead of using RAG?",
+  "a": "<p>Fine-tune for behaviour: consistent format or style, domain-specific labels (classification, NER), shorter prompts, or a small cheap model for a high-volume narrow task. Use RAG for knowledge that changes or needs citations. They combine well.</p>"
+ },
+ {
+  "q": "Explain LoRA.",
+  "a": "<p>Freeze the pretrained weight W and learn a low-rank update ΔW = (α/r)·BA with B (d × r) and A (r × k), r small (4–64). B starts at zero. It trains a tiny fraction of parameters, adapters are a few MB, multiple adapters can share one base model, and BA can be merged into W for zero extra latency.</p>"
+ },
+ {
+  "q": "How many trainable parameters does LoRA add to a 4096 × 4096 matrix with r = 8?",
+  "a": "<p>r(d + k) = 8 × (4096 + 4096) = <strong>65,536</strong>, versus 16,777,216 for full fine-tuning: about 0.39%.</p>"
+ },
+ {
+  "q": "What is QLoRA?",
+  "a": "<p>LoRA on top of a base model quantised to 4-bit NF4, with double quantisation and paged optimisers. Gradients flow through the frozen 4-bit weights into 16-bit adapters. It lets you fine-tune very large models on a single GPU with little quality loss.</p>"
+ },
+ {
+  "q": "How much GPU memory does full fine-tuning of a 7B model need?",
+  "a": "<p>Roughly 16 bytes per parameter with mixed-precision Adam (weights, gradients, FP32 master copy, two optimiser moments): about 112 GB, plus activations. Inference alone in FP16 needs about 14 GB; in 4-bit about 4 GB.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "How do you evaluate whether fine-tuning was worth it?",
+  "a": "<p>Compare against a strong baseline (the base model with a good prompt and few-shot examples, and RAG if relevant) on a held-out task-specific test set, check for regressions in general ability (catastrophic forgetting), and weigh cost and latency.</p>"
+ }
+]

@@ -1,0 +1,23 @@
+[
+ {
+  "q": "What is an embedding and why use it instead of one-hot?",
+  "a": "<p>A learned dense vector for a discrete item. One-hot vectors are huge, sparse and all equally distant; embeddings are compact and place similar items close together, so the model can generalise across related items.</p>"
+ },
+ {
+  "q": "Static vs contextual embeddings?",
+  "a": "<p>Static (Word2Vec, GloVe): one vector per word regardless of context, so \"bank\" is the same in \"river bank\" and \"bank loan\". Contextual (BERT, LLMs): the vector depends on the surrounding sentence.</p>"
+ },
+ {
+  "q": "What is negative sampling in Word2Vec?",
+  "a": "<p>Instead of a softmax over the whole vocabulary, train a binary classifier to distinguish real (word, context) pairs from a few randomly sampled fake pairs. Same idea as in-batch negatives for modern contrastive embedding training.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "How do you decide how much of a pretrained model to fine-tune?",
+  "a": "<p>Depends on data size and similarity to pretraining data. Small and similar: freeze backbone, train head. Small and different: fine-tune top layers carefully. Large: fine-tune everything with a low learning rate. Use smaller LRs for pretrained layers, gradual unfreezing, early stopping; LoRA when compute or forgetting is a concern.</p>"
+ },
+ {
+  "q": "What is catastrophic forgetting?",
+  "a": "<p>When fine-tuning on a new task overwrites knowledge from pretraining, so general performance drops. Mitigate with low learning rates, few epochs, freezing layers, mixing in general data, or parameter-efficient methods like LoRA.</p>"
+ }
+]

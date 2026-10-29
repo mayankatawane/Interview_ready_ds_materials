@@ -1,0 +1,24 @@
+[
+ {
+  "q": "How would you define the target for a churn or default model?",
+  "a": "<p>Pick an observation date. Features come only from before it; the label comes from a performance window after it (e.g. 90+ DPD within 12 months, or no activity for 60 days). Exclude indeterminate and ineligible cases. Agree the definition with the business, because it decides what the model learns.</p>"
+ },
+ {
+  "q": "Your regression target is highly skewed. What do you do?",
+  "a": "<p>Model log1p(y) and back-transform (it estimates roughly the median; use a smearing correction for the mean), or use a loss that fits the distribution: Poisson for counts, Tweedie for zero-inflated amounts like claims, Gamma for positive skewed, quantile loss for intervals. Evaluate with RMSLE or MAE on the original scale.</p>"
+ },
+ {
+  "q": "If you train on log(y), is exp(prediction) an unbiased estimate of the mean?",
+  "a": "<p>No. exp of the mean of log y is the geometric mean, which is below the arithmetic mean (Jensen's inequality). For normal log-errors multiply by \\(e^{\\sigma^2/2}\\), or use Duan's smearing estimator.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "What is data augmentation for tabular data?",
+  "a": "<p>SMOTE and variants, Gaussian noise injection, mixup, and generative synthetic data (CTGAN, TVAE, copulas). Use carefully: validate on real data only and check that relationships between features are preserved.</p>"
+ },
+ {
+  "q": "What is label noise and how do you handle it?",
+  "a": "<p>Wrong labels in training data (e.g. mis-tagged fraud). It hurts boosting most. Handle with cleaner label definitions, robust losses, confident learning (cleanlab) to find suspicious labels, bagging, and stronger regularisation.</p>",
+  "gotcha": true
+ }
+]

@@ -1,0 +1,806 @@
+[
+ {
+  "q": "Logistic regression for 5 classes using one-vs-one trains how many models?",
+  "o": [
+   "5",
+   "10",
+   "20",
+   "25"
+  ],
+  "c": 1,
+  "why": "K(K−1)/2 = 5·4/2 = 10.",
+  "s": "ml"
+ },
+ {
+  "q": "Which loss does logistic regression minimise?",
+  "o": [
+   "Mean squared error",
+   "Hinge loss",
+   "Log loss (cross-entropy)",
+   "Huber loss"
+  ],
+  "c": 2,
+  "why": "Log loss is the negative Bernoulli log-likelihood and is convex for the sigmoid.",
+  "s": "ml"
+ },
+ {
+  "q": "A coefficient of 0.69 in logistic regression means one unit increase in x…",
+  "o": [
+   "adds 0.69 to the probability",
+   "doubles the odds",
+   "halves the odds",
+   "doubles the probability"
+  ],
+  "c": 1,
+  "why": "e^0.69 ≈ 2, so the odds multiply by 2.",
+  "s": "ml"
+ },
+ {
+  "q": "A random forest overfits. Which change does NOT help?",
+  "o": [
+   "Increase min_samples_leaf",
+   "Limit max_depth",
+   "Add more trees",
+   "Lower max_features"
+  ],
+  "c": 2,
+  "why": "More trees only stabilise the average; they don't reduce each tree's overfitting.",
+  "s": "ml"
+ },
+ {
+  "q": "Roughly what share of rows is out-of-bag for each tree?",
+  "o": [
+   "10%",
+   "25%",
+   "37%",
+   "50%"
+  ],
+  "c": 2,
+  "why": "(1 − 1/n)^n → e^−1 ≈ 0.368.",
+  "s": "ml"
+ },
+ {
+  "q": "Plain bagging differs from Random Forest because bagging…",
+  "o": [
+   "uses shallow trees",
+   "uses all features at every split",
+   "is sequential",
+   "doesn't bootstrap"
+  ],
+  "c": 1,
+  "why": "Random Forest adds random feature subsets per split to decorrelate trees.",
+  "s": "ml"
+ },
+ {
+  "q": "In XGBoost the optimal leaf weight is:",
+  "o": [
+   "G/H",
+   "−G/(H+λ)",
+   "−H/(G+λ)",
+   "G²/(H+λ)"
+  ],
+  "c": 1,
+  "why": "From the second-order expansion with L2 penalty λ on leaf weights.",
+  "s": "ml"
+ },
+ {
+  "q": "In XGBoost, γ (gamma) is…",
+  "o": [
+   "the learning rate",
+   "L2 on leaf weights",
+   "minimum gain needed to split",
+   "row subsample ratio"
+  ],
+  "c": 2,
+  "why": "Splits with gain below γ are pruned.",
+  "s": "ml"
+ },
+ {
+  "q": "For log loss, min_child_weight limits the minimum sum of…",
+  "o": [
+   "rows",
+   "gradients",
+   "hessians p(1−p)",
+   "labels"
+  ],
+  "c": 2,
+  "why": "It's the minimum hessian sum in a child; confident rows contribute little.",
+  "s": "ml"
+ },
+ {
+  "q": "How does XGBoost treat missing values?",
+  "o": [
+   "Drops the rows",
+   "Imputes the mean",
+   "Learns a default direction per split",
+   "Raises an error"
+  ],
+  "c": 2,
+  "why": "Sparsity-aware split finding tries both sides and keeps the better one.",
+  "s": "ml"
+ },
+ {
+  "q": "LightGBM's main growth difference from XGBoost's default:",
+  "o": [
+   "Level-wise",
+   "Leaf-wise",
+   "Symmetric trees",
+   "No histograms"
+  ],
+  "c": 1,
+  "why": "Leaf-wise growth splits the single best leaf; control with num_leaves.",
+  "s": "ml"
+ },
+ {
+  "q": "GOSS in LightGBM keeps…",
+  "o": [
+   "all small-gradient rows",
+   "all large-gradient rows and samples the rest",
+   "only categorical features",
+   "a random 10% of rows"
+  ],
+  "c": 1,
+  "why": "Large gradients are most informative; small ones are sampled and up-weighted.",
+  "s": "ml"
+ },
+ {
+  "q": "CatBoost avoids target leakage in categorical encoding using:",
+  "o": [
+   "One-hot",
+   "Ordered target statistics",
+   "Hashing",
+   "WOE"
+  ],
+  "c": 1,
+  "why": "Each row's encoding uses only rows before it in a random permutation.",
+  "s": "ml"
+ },
+ {
+  "q": "Bagging mainly reduces ___, boosting mainly reduces ___.",
+  "o": [
+   "bias, variance",
+   "variance, bias",
+   "variance, variance",
+   "bias, bias"
+  ],
+  "c": 1,
+  "why": "Averaging decorrelated trees cuts variance; sequential residual fitting cuts bias.",
+  "s": "ml"
+ },
+ {
+  "q": "An AdaBoost weak learner with 50% error gets weight α =",
+  "o": [
+   "0",
+   "0.5",
+   "1",
+   "∞"
+  ],
+  "c": 0,
+  "why": "α = ½ ln((1−ε)/ε) = ½ ln 1 = 0.",
+  "s": "ml"
+ },
+ {
+  "q": "Which models need feature scaling?",
+  "o": [
+   "Random Forest",
+   "XGBoost",
+   "KNN and SVM",
+   "Decision tree"
+  ],
+  "c": 2,
+  "why": "Distance and margin based models depend on feature magnitudes.",
+  "s": "ml"
+ },
+ {
+  "q": "Large C in a soft-margin SVM gives…",
+  "o": [
+   "wider margin, more violations",
+   "narrower margin, fewer violations",
+   "no change",
+   "a non-linear kernel"
+  ],
+  "c": 1,
+  "why": "C is the cost per violation; large C fits training points harder.",
+  "s": "ml"
+ },
+ {
+  "q": "Large γ in an RBF SVM tends to…",
+  "o": [
+   "underfit",
+   "overfit with wiggly boundaries",
+   "remove support vectors",
+   "make it linear"
+  ],
+  "c": 1,
+  "why": "Each point's influence becomes very local.",
+  "s": "ml"
+ },
+ {
+  "q": "Training accuracy of 1-nearest-neighbour is usually:",
+  "o": [
+   "50%",
+   "about test accuracy",
+   "100%",
+   "0%"
+  ],
+  "c": 2,
+  "why": "Each point's nearest neighbour is itself.",
+  "s": "ml"
+ },
+ {
+  "q": "The zero-frequency problem in Naive Bayes is fixed by:",
+  "o": [
+   "Scaling",
+   "Laplace smoothing",
+   "PCA",
+   "Bagging"
+  ],
+  "c": 1,
+  "why": "Add α to every count so no probability is exactly zero.",
+  "s": "ml"
+ },
+ {
+  "q": "K-means vs KNN:",
+  "o": [
+   "Both supervised",
+   "K-means unsupervised, KNN supervised",
+   "K-means supervised, KNN unsupervised",
+   "Same algorithm"
+  ],
+  "c": 1,
+  "why": "Only the letter k and the use of distances are shared.",
+  "s": "ml"
+ },
+ {
+  "q": "Why standardise before PCA?",
+  "o": [
+   "PCA needs normal data",
+   "Variance depends on units",
+   "To remove outliers",
+   "It's not needed"
+  ],
+  "c": 1,
+  "why": "Large-unit features would dominate the first component.",
+  "s": "ml"
+ },
+ {
+  "q": "L1 regularisation tends to:",
+  "o": [
+   "Shrink all weights equally",
+   "Set some weights exactly to zero",
+   "Increase variance",
+   "Remove the intercept"
+  ],
+  "c": 1,
+  "why": "The L1 ball's corners lie on the axes, producing sparse solutions.",
+  "s": "ml"
+ },
+ {
+  "q": "2% positives. Which metric is most informative?",
+  "o": [
+   "Accuracy",
+   "PR-AUC",
+   "R²",
+   "MAE"
+  ],
+  "c": 1,
+  "why": "PR-AUC focuses on the positive class; its random baseline is 0.02.",
+  "s": "ml"
+ },
+ {
+  "q": "When should SMOTE be applied?",
+  "o": [
+   "Before the train/test split",
+   "On the whole dataset",
+   "Inside each training fold only",
+   "On the test set"
+  ],
+  "c": 2,
+  "why": "Otherwise synthetic points leak test information.",
+  "s": "ml"
+ },
+ {
+  "q": "Missing a fraud costs 9× a false alarm. Cost-optimal threshold (calibrated)?",
+  "o": [
+   "0.9",
+   "0.5",
+   "0.1",
+   "0.01"
+  ],
+  "c": 2,
+  "why": "C_FP/(C_FP+C_FN) = 1/(1+9) = 0.1.",
+  "s": "ml"
+ },
+ {
+  "q": "Gini = 0.5. AUC = ?",
+  "o": [
+   "0.25",
+   "0.5",
+   "0.75",
+   "1.0"
+  ],
+  "c": 2,
+  "why": "AUC = (Gini + 1)/2.",
+  "s": "ml"
+ },
+ {
+  "q": "Top 10 results contain 4 relevant items; there are 8 relevant in total. Precision@10 and recall@10?",
+  "o": [
+   "0.4 and 0.5",
+   "0.5 and 0.4",
+   "0.4 and 0.4",
+   "0.8 and 0.4"
+  ],
+  "c": 0,
+  "why": "P@10 = 4/10, R@10 = 4/8.",
+  "s": "ml"
+ },
+ {
+  "q": "Which ranking metric only looks at the first relevant result?",
+  "o": [
+   "NDCG",
+   "MAP",
+   "MRR",
+   "Precision@k"
+  ],
+  "c": 2,
+  "why": "Reciprocal rank = 1 / rank of the first relevant item.",
+  "s": "ml"
+ },
+ {
+  "q": "Correct validation for monthly sales forecasting:",
+  "o": [
+   "Shuffled 5-fold",
+   "Stratified K-fold",
+   "Forward-chaining time split",
+   "Leave-one-out"
+  ],
+  "c": 2,
+  "why": "Train on the past, validate on the future.",
+  "s": "ml"
+ },
+ {
+  "q": "Same patient appears in many rows. Use:",
+  "o": [
+   "KFold",
+   "StratifiedKFold",
+   "GroupKFold",
+   "TimeSeriesSplit"
+  ],
+  "c": 2,
+  "why": "Keep each group's rows in one fold.",
+  "s": "ml"
+ },
+ {
+  "q": "PSI of 0.32 on your score suggests:",
+  "o": [
+   "Stable population",
+   "Minor shift",
+   "Significant shift: investigate or retrain",
+   "Perfect calibration"
+  ],
+  "c": 2,
+  "why": "Above 0.25 is a major shift.",
+  "s": "ml"
+ },
+ {
+  "q": "Smoothed target encoding pulls rare categories toward:",
+  "o": [
+   "Zero",
+   "The global target mean",
+   "The mode",
+   "The feature median"
+  ],
+  "c": 1,
+  "why": "(n·ȳ_c + m·ȳ)/(n + m).",
+  "s": "ml"
+ },
+ {
+  "q": "Which error metric is most affected by one huge miss?",
+  "o": [
+   "MAE",
+   "RMSE",
+   "Median absolute error",
+   "WAPE"
+  ],
+  "c": 1,
+  "why": "Squaring makes large errors dominate.",
+  "s": "ml"
+ },
+ {
+  "q": "Random search beats grid search with the same budget mainly because…",
+  "o": [
+   "it's Bayesian",
+   "it tries more distinct values of each important parameter",
+   "it uses early stopping",
+   "it's parallel"
+  ],
+  "c": 1,
+  "why": "Only a few parameters matter; the grid wastes trials on the rest.",
+  "s": "ml"
+ },
+ {
+  "q": "SHAP values for one prediction add up to…",
+  "o": [
+   "1",
+   "the prediction minus the baseline",
+   "the AUC",
+   "the number of features"
+  ],
+  "c": 1,
+  "why": "Additivity: baseline + Σ φ = prediction.",
+  "s": "ml"
+ },
+ {
+  "q": "A dense layer from 784 to 128 units has how many parameters?",
+  "o": [
+   "100,352",
+   "100,480",
+   "784",
+   "128"
+  ],
+  "c": 1,
+  "why": "784 × 128 + 128 biases = 100,480.",
+  "s": "dl"
+ },
+ {
+  "q": "Stacking 10 linear layers with no activation gives…",
+  "o": [
+   "a deep non-linear model",
+   "a model equivalent to one linear layer",
+   "an RNN",
+   "a CNN"
+  ],
+  "c": 1,
+  "why": "Products of linear maps are linear.",
+  "s": "dl"
+ },
+ {
+  "q": "For sigmoid + binary cross-entropy, ∂L/∂z equals:",
+  "o": [
+   "y − p",
+   "p − y",
+   "p(1 − p)",
+   "−log p"
+  ],
+  "c": 1,
+  "why": "The sigmoid derivative cancels, leaving p − y.",
+  "s": "dl"
+ },
+ {
+  "q": "Sigmoid's maximum derivative is:",
+  "o": [
+   "1",
+   "0.5",
+   "0.25",
+   "0.1"
+  ],
+  "c": 2,
+  "why": "σ(0)(1 − σ(0)) = 0.25.",
+  "s": "dl"
+ },
+ {
+  "q": "He initialisation sets Var(w) to:",
+  "o": [
+   "1/n_in",
+   "2/n_in",
+   "2/(n_in + n_out)",
+   "1"
+  ],
+  "c": 1,
+  "why": "ReLU zeroes half the inputs, so twice the Xavier variance.",
+  "s": "dl"
+ },
+ {
+  "q": "Why can't all weights start at zero?",
+  "o": [
+   "Too slow",
+   "Neurons stay identical (no symmetry breaking)",
+   "Gradients explode",
+   "It's fine for ReLU"
+  ],
+  "c": 1,
+  "why": "Same output, same gradient, forever.",
+  "s": "dl"
+ },
+ {
+  "q": "AdamW differs from Adam by…",
+  "o": [
+   "using momentum",
+   "decoupling weight decay from the adaptive update",
+   "having no bias correction",
+   "using SGD"
+  ],
+  "c": 1,
+  "why": "Decay is applied directly to weights, not through the gradient.",
+  "s": "dl"
+ },
+ {
+  "q": "Inverted dropout with p = 0.5 scales kept activations by:",
+  "o": [
+   "0.5",
+   "1",
+   "2",
+   "it doesn't scale"
+  ],
+  "c": 2,
+  "why": "Divide by 1 − p so expected values match inference.",
+  "s": "dl"
+ },
+ {
+  "q": "LayerNorm computes statistics over…",
+  "o": [
+   "the batch, per feature",
+   "the features of each example",
+   "the whole dataset",
+   "time steps"
+  ],
+  "c": 1,
+  "why": "That's why it's batch-size independent.",
+  "s": "dl"
+ },
+ {
+  "q": "Output size: 32×32 input, 5×5 kernel, no padding, stride 1?",
+  "o": [
+   "32",
+   "30",
+   "28",
+   "27"
+  ],
+  "c": 2,
+  "why": "(32 − 5)/1 + 1 = 28.",
+  "s": "dl"
+ },
+ {
+  "q": "Parameters in a 3×3 conv from 64 to 128 channels:",
+  "o": [
+   "73,728",
+   "73,856",
+   "1,152",
+   "8,192"
+  ],
+  "c": 1,
+  "why": "3·3·64·128 + 128.",
+  "s": "dl"
+ },
+ {
+  "q": "In an LSTM, the gradient along the cell state is multiplied by:",
+  "o": [
+   "the output gate",
+   "the forget gate",
+   "tanh′",
+   "the learning rate"
+  ],
+  "c": 1,
+  "why": "∂c_t/∂c_{t−1} = f_t.",
+  "s": "dl"
+ },
+ {
+  "q": "Your loss turns NaN after a few steps. First thing to try?",
+  "o": [
+   "More epochs",
+   "Lower learning rate / gradient clipping",
+   "Bigger model",
+   "Remove validation"
+  ],
+  "c": 1,
+  "why": "Exploding updates are the usual cause.",
+  "s": "dl"
+ },
+ {
+  "q": "Perplexity is…",
+  "o": [
+   "accuracy × 100",
+   "exp of average cross-entropy",
+   "number of tokens",
+   "1 / loss"
+  ],
+  "c": 1,
+  "why": "e^CE.",
+  "s": "dl"
+ },
+ {
+  "q": "Before nn.CrossEntropyLoss you should pass…",
+  "o": [
+   "softmax probabilities",
+   "raw logits",
+   "one-hot labels as input",
+   "log probabilities only"
+  ],
+  "c": 1,
+  "why": "It applies log-softmax internally.",
+  "s": "dl"
+ },
+ {
+  "q": "Why divide attention scores by √d_k?",
+  "o": [
+   "To save memory",
+   "To keep softmax from saturating as dimensions grow",
+   "To make rows sum to 1",
+   "To apply the mask"
+  ],
+  "c": 1,
+  "why": "Dot-product variance grows with d_k.",
+  "s": "genai"
+ },
+ {
+  "q": "A causal mask prevents a token from attending to…",
+  "o": [
+   "earlier tokens",
+   "padding",
+   "later tokens",
+   "itself"
+  ],
+  "c": 2,
+  "why": "So next-token training can't peek at the answer.",
+  "s": "genai"
+ },
+ {
+  "q": "Hidden size 768 with 12 heads gives per-head dimension:",
+  "o": [
+   "12",
+   "64",
+   "768",
+   "9,216"
+  ],
+  "c": 1,
+  "why": "768 / 12.",
+  "s": "genai"
+ },
+ {
+  "q": "GQA mainly reduces…",
+  "o": [
+   "training data",
+   "KV-cache size",
+   "vocabulary",
+   "number of layers"
+  ],
+  "c": 1,
+  "why": "Fewer key/value heads to store.",
+  "s": "genai"
+ },
+ {
+  "q": "Self-attention cost grows with sequence length n as:",
+  "o": [
+   "O(n)",
+   "O(n log n)",
+   "O(n²)",
+   "O(1)"
+  ],
+  "c": 2,
+  "why": "n × n score matrix.",
+  "s": "genai"
+ },
+ {
+  "q": "Which model family is best for producing sentence embeddings and reranking?",
+  "o": [
+   "Decoder-only",
+   "Encoder-only",
+   "RNN",
+   "GAN"
+  ],
+  "c": 1,
+  "why": "Bidirectional encoders like BERT.",
+  "s": "genai"
+ },
+ {
+  "q": "Top-p = 0.9 keeps…",
+  "o": [
+   "the 9 best tokens",
+   "the smallest set with cumulative probability ≥ 0.9",
+   "tokens with p > 0.9",
+   "90% of the vocabulary"
+  ],
+  "c": 1,
+  "why": "Nucleus sampling.",
+  "s": "genai"
+ },
+ {
+  "q": "Temperature below 1 makes the distribution…",
+  "o": [
+   "flatter",
+   "sharper",
+   "uniform",
+   "unchanged"
+  ],
+  "c": 1,
+  "why": "Logits divided by T < 1 grow apart.",
+  "s": "genai"
+ },
+ {
+  "q": "LoRA with r = 8 on a 4096 × 4096 matrix trains how many parameters?",
+  "o": [
+   "32,768",
+   "65,536",
+   "16.7M",
+   "8"
+  ],
+  "c": 1,
+  "why": "r(d + k) = 8 × 8192.",
+  "s": "genai"
+ },
+ {
+  "q": "Policies change monthly and answers need citations. Best approach?",
+  "o": [
+   "Full fine-tuning",
+   "RAG",
+   "Bigger model",
+   "Higher temperature"
+  ],
+  "c": 1,
+  "why": "RAG updates by re-indexing and cites sources.",
+  "s": "genai"
+ },
+ {
+  "q": "RRF with k = 60: a document ranked 1st in one list and absent from the other scores:",
+  "o": [
+   "1/60",
+   "1/61",
+   "2/61",
+   "1"
+  ],
+  "c": 1,
+  "why": "1/(60 + 1).",
+  "s": "genai"
+ },
+ {
+  "q": "Cross-encoders are used for reranking rather than first-stage retrieval because they…",
+  "o": [
+   "are less accurate",
+   "need a model call per query-document pair",
+   "can't read text",
+   "need GPUs for indexing"
+  ],
+  "c": 1,
+  "why": "Too slow over millions of documents.",
+  "s": "genai"
+ },
+ {
+  "q": "Retrieval misses a chunk with the exact product code typed. Add:",
+  "o": [
+   "higher temperature",
+   "BM25 / hybrid search",
+   "more chunk overlap",
+   "a bigger LLM"
+  ],
+  "c": 1,
+  "why": "Keyword search matches exact tokens.",
+  "s": "genai"
+ },
+ {
+  "q": "Faithfulness measures…",
+  "o": [
+   "whether the answer is correct",
+   "share of answer claims supported by retrieved context",
+   "retrieval recall",
+   "latency"
+  ],
+  "c": 1,
+  "why": "Groundedness, not correctness.",
+  "s": "genai"
+ },
+ {
+  "q": "In an agent, who actually executes a tool call?",
+  "o": [
+   "The LLM",
+   "Your application code",
+   "The vector DB",
+   "The tokenizer"
+  ],
+  "c": 1,
+  "why": "The model only proposes structured calls.",
+  "s": "genai"
+ },
+ {
+  "q": "DPO differs from RLHF-PPO because it…",
+  "o": [
+   "needs no preference data",
+   "skips the separate reward model and RL loop",
+   "only works for images",
+   "adds knowledge"
+  ],
+  "c": 1,
+  "why": "Direct loss on chosen vs rejected pairs.",
+  "s": "genai"
+ }
+]

@@ -1,0 +1,23 @@
+[
+ {
+  "q": "Explain temperature, top-k and top-p.",
+  "a": "<p>Temperature divides logits before softmax: lower is sharper and more deterministic, higher is flatter and more random. Top-k keeps only the k most likely tokens. Top-p keeps the smallest set whose cumulative probability ≥ p, so it adapts to the model's confidence. After filtering, probabilities are renormalised and a token is sampled.</p>"
+ },
+ {
+  "q": "Greedy vs beam search vs sampling?",
+  "a": "<p>Greedy picks the top token each step: fast but can loop. Beam search tracks the B best sequences: good for translation/summarisation, bland for chat. Sampling with temperature/top-p gives diverse, natural text for open-ended generation.</p>"
+ },
+ {
+  "q": "Does temperature 0 guarantee identical outputs?",
+  "a": "<p>No. GPU floating-point non-determinism, batching with other requests, and model/provider updates can change outputs. It's near-deterministic, not guaranteed.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "What settings would you use for a RAG answer vs brainstorming?",
+  "a": "<p>RAG, extraction, SQL: temperature 0–0.2, structured output, citations. Brainstorming or creative writing: temperature ~0.9–1.2 with top-p ~0.9–0.95.</p>"
+ },
+ {
+  "q": "How do you force an LLM to output valid JSON?",
+  "a": "<p>Use the provider's structured output / JSON schema mode or function calling, which constrains decoding to valid tokens; or grammar-constrained decoding for open models. Validate with Pydantic and retry with the error message if parsing fails.</p>"
+ }
+]

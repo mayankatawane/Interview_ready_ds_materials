@@ -1,0 +1,62 @@
+---
+import Base from '../layouts/Base.astro';
+import { allTopics, slugOf, topicUrl, questionsFor, renderMath } from '../lib/content';
+import { SUBJECTS } from '../data/subjects';
+const topics = await allTopics();
+const data = topics.flatMap((t) => questionsFor(slugOf(t)).map((q) => ({
+  key: `${slugOf(t)}|${q.q.slice(0, 60)}`, q: q.q, a: renderMath(q.a), g: !!q.gotcha,
+  t: slugOf(t), tn: t.data.short, s: t.data.subject, u: topicUrl(t),
+})));
+const subs = SUBJECTS.filter((s) => data.some((d) => d.s === s.id)).map((s) => [s.id, s.name]);
+const tops = topics.filter((t) => questionsFor(slugOf(t)).length).map((t) => [slugOf(t), t.data.short, t.data.subject]);
+---
+<Base title="Question bank" active="questions">
+  <h1>Question bank</h1>
+  <p class="lead">Every interview question in one place. Use flashcards, mark what you knew, and come back to your review pile.</p>
+  <div id="bank"></div>
+  <script type="application/json" id="qdata" set:html={JSON.stringify({ data, subs, tops })}></script>
+  <script is:inline>
+    (function () {
+      const S = window.DSK, { data, subs, tops } = JSON.parse(document.getElementById('qdata').textContent);
+      const cards = S.get('dsk-cards', {}), root = document.getElementById('bank');
+      const params = new URLSearchParams(location.search);
+      let subj = 'all', topic = 'all', status = params.get('status') || 'all', gotcha = false, mode = 'list', order = data.map((_, i) => i), pos = 0, shown = false;
+      const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+      const list = () => order.map((i) => data[i]).filter((q) => (subj === 'all' || q.s === subj) && (topic === 'all' || q.t === topic) && (!gotcha || q.g) && (status === 'all' || (status === 'review' ? cards[q.key] === 'r' : status === 'known' ? cards[q.key] === 'k' : !cards[q.key])));
+      const chipFor = (k) => cards[k] === 'k' ? '<span class="chip known">Knew it</span>' : cards[k] === 'r' ? '<span class="chip review">Review</span>' : '';
+      const btns = (name, cur, opts) => `<div class="filters" role="group">${opts.map(([v, l]) => `<button type="button" data-${name}="${v}" aria-pressed="${cur === v}">${esc(l)}</button>`).join('')}</div>`;
+      function ui() {
+        const L = list(), scope = data.filter((q) => subj === 'all' || q.s === subj);
+        let h = `<div class="statrow"><div class="statcard"><span>Questions</span><strong>${scope.length}</strong></div><div class="statcard"><span>Gotchas</span><strong>${scope.filter((q) => q.g).length}</strong></div><div class="statcard"><span>Knew it</span><strong>${scope.filter((q) => cards[q.key] === 'k').length}</strong></div><div class="statcard"><span>Review pile</span><strong style="color:var(--bad)">${scope.filter((q) => cards[q.key] === 'r').length}</strong></div></div>`;
+        h += btns('mode', mode, [['list', 'List'], ['flash', 'Flashcards']]);
+        h += btns('subj', subj, [['all', 'All subjects'], ...subs]);
+        h += btns('status', status, [['all', 'All'], ['new', 'Not marked'], ['review', 'Review pile'], ['known', 'Knew it']]) ;
+        h += `<div class="filters"><button type="button" data-gotcha="1" aria-pressed="${gotcha}">Gotchas only</button><button type="button" data-shuffle="1">Shuffle</button></div>`;
+        h += btns('topic', topic, [['all', 'All topics'], ...tops.filter((t) => subj === 'all' || t[2] === subj).map((t) => [t[0], t[1]])]);
+        if (!L.length) h += '<p class="muted">No questions match these filters.</p>';
+        else if (mode === 'list') h += L.map((q, i) => `<details class="q"><summary><span class="qn">Q${i + 1}</span><span class="qt">${esc(q.q)}</span>${q.g ? '<span class="chip gotcha">Gotcha</span>' : ''}<span class="chip">${esc(q.tn)}</span>${chipFor(q.key)}</summary><div class="ans prose">${q.a}<div class="markrow"><button class="btn good" type="button" data-mk="k" data-key="${esc(q.key)}">Knew it</button><button class="btn bad" type="button" data-mk="r" data-key="${esc(q.key)}">Review again</button><a class="btn" href="${q.u}">Open topic</a></div></div></details>`).join('');
+        else {
+          if (pos >= L.length) pos = 0; const q = L[pos];
+          h += `<div class="flash"><div class="fmeta"><span>Card ${pos + 1} of ${L.length}</span><span class="chip">${esc(q.tn)}</span>${q.g ? '<span class="chip gotcha">Gotcha</span>' : ''}${chipFor(q.key)}</div><div class="fq">${esc(q.q)}</div>${shown ? `<div class="fa prose">${q.a}</div>` : '<p class="muted">Say your answer out loud, then reveal.</p>'}<div class="fbtns"><button class="btn" type="button" data-f="prev">← Prev</button>${shown ? '<button class="btn good" type="button" data-f="k">Knew it</button><button class="btn bad" type="button" data-f="r">Review again</button>' : '<button class="btn solid" type="button" data-f="show">Show answer</button>'}<button class="btn" type="button" data-f="next">Next →</button></div></div>`;
+        }
+        root.innerHTML = h;
+        root.querySelectorAll('[data-mode]').forEach((b) => b.onclick = () => { mode = b.dataset.mode; pos = 0; shown = false; ui(); });
+        root.querySelectorAll('[data-subj]').forEach((b) => b.onclick = () => { subj = b.dataset.subj; topic = 'all'; pos = 0; shown = false; ui(); });
+        root.querySelectorAll('[data-status]').forEach((b) => b.onclick = () => { status = b.dataset.status; pos = 0; shown = false; ui(); });
+        root.querySelectorAll('[data-topic]').forEach((b) => b.onclick = () => { topic = b.dataset.topic; pos = 0; shown = false; ui(); });
+        root.querySelectorAll('[data-gotcha]').forEach((b) => b.onclick = () => { gotcha = !gotcha; pos = 0; shown = false; ui(); });
+        root.querySelectorAll('[data-shuffle]').forEach((b) => b.onclick = () => { order = order.slice().sort(() => Math.random() - 0.5); pos = 0; shown = false; ui(); });
+        root.querySelectorAll('[data-mk]').forEach((b) => b.onclick = () => { cards[b.dataset.key] = b.dataset.mk; S.set('dsk-cards', cards); ui(); });
+        root.querySelectorAll('[data-f]').forEach((b) => b.onclick = () => {
+          const f = b.dataset.f, L2 = list(), q = L2[pos];
+          if (f === 'show') shown = true;
+          if (f === 'next') { pos = (pos + 1) % L2.length; shown = false; }
+          if (f === 'prev') { pos = (pos - 1 + L2.length) % L2.length; shown = false; }
+          if (f === 'k' || f === 'r') { cards[q.key] = f; S.set('dsk-cards', cards); shown = false; const L3 = list(); if (L3.length === L2.length) pos = (pos + 1) % L3.length; else if (pos >= L3.length) pos = 0; }
+          ui();
+        });
+      }
+      ui();
+    })();
+  </script>
+</Base>

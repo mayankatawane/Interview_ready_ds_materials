@@ -1,0 +1,17 @@
+---
+import Base from '../layouts/Base.astro';
+import { url } from '../lib/content';
+---
+<Base title="Search" active="search">
+  <h1>Search</h1>
+  <p class="lead">Search every topic and interview question. Try “OOB”, “min_samples_leaf” or “softmax”.</p>
+  <link href={url('pagefind/pagefind-ui.css')} rel="stylesheet" />
+  <div id="search"></div>
+  <script is:inline src={url('pagefind/pagefind-ui.js')}></script>
+  <script is:inline>
+    window.addEventListener('DOMContentLoaded', () => {
+      if (!window.PagefindUI) { document.getElementById('search').textContent = 'Search becomes available after the site is built and published.'; return; }
+      new PagefindUI({ element: '#search', showSubResults: true, showImages: false, autofocus: true });
+    });
+  </script>
+</Base>
