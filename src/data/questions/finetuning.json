@@ -23,5 +23,23 @@
  {
   "q": "How do you evaluate whether fine-tuning was worth it?",
   "a": "<p>Compare against a strong baseline (the base model with a good prompt and few-shot examples, and RAG if relevant) on a held-out task-specific test set, check for regressions in general ability (catastrophic forgetting), and weigh cost and latency.</p>"
+ },
+ {
+  "q": "Can fine-tuning reliably teach an LLM new facts?",
+  "a": "<p>Not reliably. It may memorise some facts but still hallucinate details, can't cite sources, must be retrained when facts change, and can't apply per-user permissions. Use RAG for knowledge and fine-tuning for behaviour, format and style.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Why is B initialised to zero in LoRA?",
+  "a": "<p>So \\(BA = 0\\) at the start and the adapted model equals the original exactly. Training then moves smoothly from the pretrained behaviour instead of starting from a random perturbation.</p>"
+ },
+ {
+  "q": "Does LoRA add inference latency?",
+  "a": "<p>Not if you merge it: compute \\(W_0 + \\frac{\\alpha}{r}BA\\) once and serve a normal model. Keeping adapters separate adds a small cost but lets one base model serve many adapters.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "What is catastrophic forgetting and how do you limit it?",
+  "a": "<p>Fine-tuning erases general abilities the model had. Limit it with LoRA (base frozen), a low learning rate, few epochs, mixing in general data, and evaluating general benchmarks alongside the task metric.</p>"
  }
 ]

@@ -32,5 +32,14 @@
  {
   "q": "Self-attention vs cross-attention?",
   "a": "<p>Self-attention: Q, K and V come from the same sequence. Cross-attention: queries from one sequence (decoder) and keys/values from another (encoder output, or image features), used in encoder–decoder and multimodal models.</p>"
+ },
+ {
+  "q": "Walk through attention for one token with numbers.",
+  "a": "<p>Query \\(q=[1,0]\\), keys \\([1,0]\\) and \\([0,1]\\), values \\([10,0]\\) and \\([0,10]\\), \\(d_k=2\\). Scores 1 and 0; scaled 0.707 and 0; softmax ≈ [0.67, 0.33]; output = 0.67·[10,0] + 0.33·[0,10] = [6.7, 3.3]. The token takes mostly the first token's information.</p>"
+ },
+ {
+  "q": "What does FlashAttention change: the maths or the implementation?",
+  "a": "<p>Only the implementation. It computes exactly the same attention output, but in tiles that fit in fast on-chip GPU memory, never writing the full \\(n\\times n\\) score matrix to slow memory. Result: faster and far less memory for long sequences, with no approximation.</p>",
+  "gotcha": true
  }
 ]

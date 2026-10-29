@@ -20,5 +20,22 @@
   "q": "Why is there a KL penalty in RLHF?",
   "a": "<p>Without it, the policy can exploit weaknesses of the reward model (\"reward hacking\") and drift into strange text that scores high but is bad. The KL term keeps it close to the SFT model's distribution.</p>",
   "gotcha": true
+ },
+ {
+  "q": "What is perplexity, with an example?",
+  "a": "<p>Perplexity = \\(e^{\\text{average cross-entropy}}\\): roughly how many tokens the model is choosing between. If the true next token always gets probability 0.25, loss = −ln 0.25 = 1.386 and perplexity = 4. Only comparable across models with the same tokenizer and test set.</p>"
+ },
+ {
+  "q": "Why is SFT loss usually computed only on the response tokens?",
+  "a": "<p>We want the model to learn to produce good answers, not to reproduce user prompts. Masking the prompt tokens focuses training on the assistant's output and avoids wasting capacity on modelling questions.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "What is reward hacking?",
+  "a": "<p>The policy finds outputs that score high with the reward model without being genuinely better, e.g. overly long or flattering answers. Mitigations: KL penalty to the SFT model, better and more diverse preference data, reward-model ensembles, and human checks.</p>"
+ },
+ {
+  "q": "Base model vs instruct model: which would you fine-tune?",
+  "a": "<p>Usually the instruct model, since it already follows instructions and chat format, so a few thousand examples go further. Start from a base model when you want to do your own domain pretraining or need pure completion behaviour.</p>"
  }
 ]

@@ -28,5 +28,18 @@
   "q": "Pre-filtering vs post-filtering in vector search?",
   "a": "<p>Post-filtering retrieves top-k by similarity and then drops items that fail the metadata filter, which can leave too few results. Pre-filtering restricts the search to items that pass the filter first, which is correct but harder to do efficiently with ANN indexes. Good vector DBs support filtered search natively.</p>",
   "gotcha": true
+ },
+ {
+  "q": "How are embedding models trained?",
+  "a": "<p>A Transformer encoder with pooling is fine-tuned with contrastive loss on (query, relevant passage) pairs: pull each query towards its passage and push it away from in-batch and hard negatives, essentially a softmax over 'which passage is the right one'.</p>"
+ },
+ {
+  "q": "You switched embedding models. What else must change?",
+  "a": "<p>Re-embed and re-index every chunk: vectors from different models live in different spaces and can't be compared. Store the model name/version with the index and re-run retrieval evaluation.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "What are the key HNSW parameters?",
+  "a": "<p>M (links per node; more = better recall, more memory), ef_construction (build quality) and ef_search (candidates explored per query; higher = better recall, slower).</p>"
  }
 ]

@@ -27,5 +27,22 @@
  {
   "q": "How do you handle follow-up questions in a chat RAG?",
   "a": "<p>Condense the chat history and the new message into a standalone question with an LLM (\"what about oncology?\" → \"What is the reimbursement limit for oncology conferences?\") before retrieval.</p>"
+ },
+ {
+  "q": "When does BM25 beat dense retrieval?",
+  "a": "<p>Exact identifiers and codes, rare names (drugs, genes), short keyword queries, and domains or new jargon the embedding model never saw. That's why hybrid search is the production default.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Compute RRF for a document ranked 1st by BM25 and 5th by dense (k = 60).",
+  "a": "<p>1/61 + 1/65 = 0.01639 + 0.01538 = 0.0318. A document ranked 3rd and 1st scores 1/63 + 1/61 = 0.0323, slightly higher because it's near the top of both lists.</p>"
+ },
+ {
+  "q": "How do you choose k for retrieval and for the prompt?",
+  "a": "<p>Retrieval k from the recall@k curve on a golden set (where it flattens, often 20–50). Final k after reranking small enough to keep precision, cost and latency down, typically 3–8, optionally with a reranker score threshold.</p>"
+ },
+ {
+  "q": "Why is first-stage retrieval tuned for recall and reranking for precision?",
+  "a": "<p>A chunk missed in the first stage can never be recovered later, so cast a wide net. The reranker then puts the best few at the top, because only those go into the prompt.</p>"
  }
 ]

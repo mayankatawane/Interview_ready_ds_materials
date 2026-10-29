@@ -1535,7 +1535,7 @@ VIZ["rrf-calc"] = box => {
   const draw = () => {
     const k = +sk.value, all = [...new Set([...bm, ...dn])];
     const rows = all.map(d => { const a = bm.indexOf(d) + 1, b = dn.indexOf(d) + 1, ca = a ? 1 / (k + a) : 0, cb = b ? 1 / (k + b) : 0; return { d, a, b, ca, cb, s: ca + cb }; }).sort((x, y) => y.s - x.s);
-    wrap.innerHTML = `<table><tr><th>Doc</th><th class="num">BM25 rank</th><th class="num">Dense rank</th><th class="num">1/(k+r) BM25</th><th class="num">1/(k+r) dense</th><th class="num">RRF score</th><th class="num">Fused rank</th></tr>${rows.map((r, i) => `<tr><td><strong>${r.d}</strong></td><td class="num">${r.a || "–"}</td><td class="num">${r.b || "–"}</td><td class="num">${r.ca ? r.ca.toFixed(4) : "0"}</td><td class="num">${r.cb ? r.cb.toFixed(4) : "0"}</td><td class="num"><strong>${r.s.toFixed(4)}</strong></td><td class="num">${i + 1}</td></tr>`).join("")}</table>`;
+    wrap.innerHTML = `<table><tr><th>Doc</th><th class="num">BM25 rank</th><th class="num">Dense rank</th><th class="num">RRF score</th><th class="num">Fused</th></tr>${rows.map((r, i) => `<tr><td><strong>${r.d}</strong></td><td class="num">${r.a || "–"}</td><td class="num">${r.b || "–"}</td><td class="num" title="${r.ca.toFixed(4)} + ${r.cb.toFixed(4)}"><strong>${r.s.toFixed(4)}</strong><div style="font-size:.72rem;color:var(--muted)">${r.ca ? r.ca.toFixed(4) : "0"} + ${r.cb ? r.cb.toFixed(4) : "0"}</div></td><td class="num">#${i + 1}</td></tr>`).join("")}</table>`;
     nt.textContent = k < 10 ? "Small k makes the top ranks dominate: being #1 in one list matters much more than appearing in both." : "With k = 60 (the usual default), appearing in both lists matters more than being first in one.";
   };
   sk.addEventListener("input", draw); draw();

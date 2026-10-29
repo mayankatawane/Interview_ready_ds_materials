@@ -19,5 +19,18 @@
  {
   "q": "What is parent–child (small-to-big) retrieval?",
   "a": "<p>Index small child chunks for precise matching, but when one matches, return its larger parent section (or neighbouring chunks) to the LLM so it has enough context to answer.</p>"
+ },
+ {
+  "q": "How many chunks does a 10,000-token document make with size 500 and overlap 100?",
+  "a": "<p>Each chunk starts 400 tokens after the previous: \\(\\lceil (10000-100)/400 \\rceil = 25\\) chunks, versus 20 without overlap, so 25% more vectors.</p>"
+ },
+ {
+  "q": "How do you chunk PDFs with tables?",
+  "a": "<p>Use a layout-aware parser, keep each table whole (or row groups with the header repeated), convert it to Markdown, attach the section heading, and optionally index an LLM-written summary of the table for retrieval.</p>"
+ },
+ {
+  "q": "A chunk says 'It should not be used in…'. What's the problem and fix?",
+  "a": "<p>The chunk lost its context: 'it' isn't named. Prepend the document title and section heading (or a short LLM-generated context line) to each chunk before embedding, and keep them as metadata.</p>",
+  "gotcha": true
  }
 ]

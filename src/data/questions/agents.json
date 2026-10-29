@@ -32,5 +32,22 @@
  {
   "q": "How do you add memory to an agent?",
   "a": "<p>Short-term: keep the conversation in the graph state, trimming or summarising older turns. Long-term: write durable facts to a store (vector DB or key-value) and retrieve them when relevant. LangGraph checkpointers persist state per thread.</p>"
+ },
+ {
+  "q": "Does the LLM execute the tool?",
+  "a": "<p>No. The model only outputs a structured call (name + JSON arguments). Your application validates and executes it, which is where you enforce permissions, read-only access, timeouts and input checks.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "How do you evaluate an agent?",
+  "a": "<p>Task success on a fixed set of realistic tasks, trajectory quality (right tools, valid arguments, no wasted steps), efficiency (steps, tokens, cost, latency) and safety (no forbidden actions, correct escalations).</p>"
+ },
+ {
+  "q": "Single agent or multi-agent?",
+  "a": "<p>Start single. Multi-agent (supervisor with specialists) helps when sub-tasks need clearly different tools or prompts, but adds cost, latency and hand-off failures.</p>"
+ },
+ {
+  "q": "How do you stop an agent from looping forever?",
+  "a": "<p>Max iterations / recursion limit, token and cost budgets, timeouts, detection of repeated identical tool calls, and clear tool error messages so the model can change course.</p>"
  }
 ]

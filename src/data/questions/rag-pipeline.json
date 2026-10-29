@@ -28,5 +28,26 @@
  {
   "q": "What is agentic RAG?",
   "a": "<p>An agent decides when and where to retrieve (vector store, SQL, knowledge graph, web), can rewrite queries, grade results, and loop until it has enough context. More flexible for complex questions, but slower and harder to control than a fixed pipeline.</p>"
+ },
+ {
+  "q": "What problem does RAG solve?",
+  "a": "<p>LLMs have a knowledge cutoff, haven't seen private documents, hallucinate and can't cite. RAG retrieves relevant passages at question time and puts them in the prompt, so answers are grounded, current, citable and permission-aware without retraining.</p>"
+ },
+ {
+  "q": "How do you handle documents that contradict each other?",
+  "a": "<p>Store version, date and source authority as metadata; filter or boost the latest/authoritative version; tell the model to note conflicts and cite both; and fix the knowledge base by retiring outdated documents.</p>"
+ },
+ {
+  "q": "How do you keep the knowledge base up to date?",
+  "a": "<p>Incremental indexing triggered by document changes, stable document IDs so you can upsert/delete chunks, versions and dates in metadata, and periodic full re-index when the chunking or embedding model changes.</p>"
+ },
+ {
+  "q": "Where is the latency in a RAG system and how do you reduce it?",
+  "a": "<p>Query rewriting LLM call, embedding, vector search, reranking and (mostly) generation. Reduce with a small model for rewriting, caching, fewer candidates for reranking or a smaller reranker, fewer chunks in the prompt, prompt caching and streaming.</p>"
+ },
+ {
+  "q": "When is agentic RAG the wrong choice?",
+  "a": "<p>For simple single-hop lookups with strict latency or cost budgets. Agents add multiple LLM calls, unpredictability and harder testing. Use a fixed pipeline and reserve agents for multi-step or multi-source questions.</p>",
+  "gotcha": true
  }
 ]

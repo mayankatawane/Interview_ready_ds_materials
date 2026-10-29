@@ -19,5 +19,26 @@
  {
   "q": "How do you force an LLM to output valid JSON?",
   "a": "<p>Use the provider's structured output / JSON schema mode or function calling, which constrains decoding to valid tokens; or grammar-constrained decoding for open models. Validate with Pydantic and retry with the error message if parsing fails.</p>"
+ },
+ {
+  "q": "Compute softmax with temperature for logits [2, 1, 0.1].",
+  "a": "<p>T = 1: [0.66, 0.24, 0.10]. T = 0.5 (logits doubled to [4, 2, 0.2]): [0.86, 0.12, 0.02], sharper. T = 2 (logits halved): [0.50, 0.30, 0.19], flatter.</p>"
+ },
+ {
+  "q": "Why is top-p often preferred over top-k?",
+  "a": "<p>Top-p adapts to the model's confidence: when one token has 95% probability it keeps just that one; when the distribution is flat it keeps many. A fixed top-k keeps the same number of candidates in both cases, allowing junk when confident and cutting off good options when uncertain.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "How does speculative decoding speed things up without changing quality?",
+  "a": "<p>A small draft model proposes several tokens; the large model scores all of them in one forward pass and accepts the longest prefix consistent with its own distribution (with a correction step). Several tokens per large-model pass, mathematically the same output distribution.</p>"
+ },
+ {
+  "q": "What are TTFT and TPOT?",
+  "a": "<p>Time to first token (driven by prefill and prompt length) and time per output token (driven by decode speed). Users feel TTFT most, so shorter prompts, prompt caching and streaming help perceived latency.</p>"
+ },
+ {
+  "q": "Ways to make LLM inference faster?",
+  "a": "<p>KV cache, quantisation (INT8/4-bit), continuous batching and PagedAttention (vLLM), speculative decoding, FlashAttention, prompt caching, smaller or distilled models, and shorter prompts/outputs.</p>"
  }
 ]

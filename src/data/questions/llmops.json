@@ -28,5 +28,17 @@
   "q": "What is continuous batching in vLLM?",
   "a": "<p>Instead of waiting for a whole batch to finish, the server adds new requests and removes finished ones at every decoding step, keeping the GPU busy. Combined with PagedAttention (KV cache in pages, like virtual memory) it greatly increases throughput.</p>",
   "gotcha": true
+ },
+ {
+  "q": "Estimate the monthly cost of a RAG assistant.",
+  "a": "<p>Requests × (input tokens × input price + output tokens × output price) per million. E.g. 100k questions × 4,000 input tokens at $2.50/M = $1,000, plus 300 output tokens at $10/M = $300: about $1,300/month. Input dominates, so trim context and cache prompts.</p>"
+ },
+ {
+  "q": "How do you roll out a prompt or model change safely?",
+  "a": "<p>Version it, run the offline eval suite in CI and block regressions, release to a small canary or shadow share, A/B test on online metrics, keep instant rollback, and pin model versions.</p>"
+ },
+ {
+  "q": "Design a RAG assistant for internal documents: what's your structure?",
+  "a": "<p>Clarify requirements; indexing (parse, chunk, metadata, embed, hybrid index, updates); query path (rewrite, route, permission-filtered retrieval, rerank, cited generation); guardrails; evaluation (golden set, CI gates); serving and monitoring; then trade-offs and next iterations.</p>"
  }
 ]

@@ -29,5 +29,14 @@
   "q": "Why do LLMs hallucinate?",
   "a": "<p>They are trained to produce plausible next tokens, not to verify facts. When knowledge is missing, rare or ambiguous, the most plausible continuation can be wrong but fluent. Training also rewards always answering. RAG, citations, abstention instructions and verification reduce it.</p>",
   "gotcha": true
+ },
+ {
+  "q": "What is the context window, and does a bigger one remove the need for RAG?",
+  "a": "<p>The maximum number of tokens (prompt + output) the model can process at once. Bigger windows help but don't replace RAG: cost and latency grow with prompt length, models miss facts buried in the middle of long prompts, you lose citations and per-user access control, and most corpora are far bigger than any window.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Why does the same text cost more tokens in Hindi or in code than in English?",
+  "a": "<p>Tokenizers are trained mostly on English text, so common English words are single tokens while other scripts, rare words, numbers and code get split into many small pieces. More tokens means higher cost, less room in the context window and sometimes worse quality.</p>"
  }
 ]

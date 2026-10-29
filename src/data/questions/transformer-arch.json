@@ -28,5 +28,17 @@
  {
   "q": "Why did decoder-only models become the default for LLMs?",
   "a": "<p>One simple objective (next-token prediction) that uses all text and scales smoothly, natural generation, strong in-context learning, and the ability to handle classification or extraction by generating the answer. KV caching also makes generation efficient.</p>"
+ },
+ {
+  "q": "What is RoPE and why is it popular?",
+  "a": "<p>Rotary positional embedding rotates each query and key vector by an angle that depends on its position. The dot product between a query and key then depends on their <em>relative</em> distance, which generalises better and can be stretched to longer contexts (with scaling tricks). Used in LLaMA, Mistral and most modern LLMs.</p>"
+ },
+ {
+  "q": "Estimate the KV cache size for a 7B model at 4,096 tokens.",
+  "a": "<p>Per token: 2 (K and V) × 32 layers × 32 heads × 128 dims × 2 bytes ≈ 0.5 MB. × 4,096 tokens ≈ 2 GB per sequence. Grouped-query attention (e.g. 8 KV heads) cuts this 4×.</p>"
+ },
+ {
+  "q": "Why do residual connections matter in deep Transformers?",
+  "a": "<p>\\(y = x + F(x)\\) gives gradients a direct path back through dozens of layers, preventing vanishing gradients, and lets each layer learn a small refinement instead of a whole new representation.</p>"
  }
 ]

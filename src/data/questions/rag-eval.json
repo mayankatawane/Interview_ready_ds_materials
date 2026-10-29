@@ -28,5 +28,22 @@
  {
   "q": "How do you build a golden evaluation set?",
   "a": "<p>50–300 questions from real users or experts with reference answers and source passages, covering easy, hard, multi-hop, table, out-of-scope and adversarial cases. Bootstrap with LLM-generated questions from the documents and have experts review. Version it and run it in CI.</p>"
+ },
+ {
+  "q": "Compute MRR: first relevant hit at ranks 1, 3, and not found.",
+  "a": "<p>(1/1 + 1/3 + 0) / 3 = 0.44. Hit rate@5 is 2/3 = 0.67.</p>"
+ },
+ {
+  "q": "Why separate retrieval from generation evaluation?",
+  "a": "<p>A wrong answer can come from a missed chunk or from the LLM misusing a good chunk. Measuring recall@k and faithfulness separately tells you which component to fix.</p>"
+ },
+ {
+  "q": "For retrieval, recall or precision: which matters more?",
+  "a": "<p>Recall, at the first stage: a missing chunk can't be recovered, while an extra irrelevant one can be filtered by the reranker or ignored. Precision matters for the final few chunks in the prompt.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "How do you evaluate without many labelled questions?",
+  "a": "<p>Generate questions per chunk with an LLM (the source chunk becomes the gold label), have experts review a sample, add real user questions as they arrive, and freeze and version the set.</p>"
  }
 ]

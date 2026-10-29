@@ -15,5 +15,27 @@
  {
   "q": "How do you manage prompts in production?",
   "a": "<p>Version them like code, keep them out of hard-coded strings (templates/config), evaluate every change against a golden test set, log which prompt version produced each answer, and A/B test significant changes.</p>"
+ },
+ {
+  "q": "What is chain-of-thought and when does it hurt?",
+  "a": "<p>Asking the model to reason step by step before answering; it helps multi-step maths and logic. It adds tokens (cost, latency), may not help simple lookups, and adds little or can hurt with reasoning models that already think internally.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "What is self-consistency?",
+  "a": "<p>Sample several chain-of-thought answers at higher temperature and take the majority final answer. Improves accuracy on reasoning tasks at the cost of several calls.</p>"
+ },
+ {
+  "q": "What is indirect prompt injection?",
+  "a": "<p>Malicious instructions hidden in content the system retrieves or a tool returns (a web page, email, PDF), not typed by the user. Especially dangerous for RAG and agents with tools. Defend with content separation, least-privilege tools, output validation and human approval for actions.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "How do you test whether a prompt change is an improvement?",
+  "a": "<p>Run old and new prompts on the same frozen evaluation set, compare task metrics (accuracy, faithfulness, format validity), read the failures, change one thing at a time, and only then ship, ideally via A/B test.</p>"
+ },
+ {
+  "q": "Few-shot examples: how many and which?",
+  "a": "<p>Typically 2–5, covering edge cases and all labels in balance, in the exact output format. Test 0/3/5 on the eval set: more examples cost tokens and can bias the model towards the most common label.</p>"
  }
 ]
