@@ -1,0 +1,29 @@
+[
+ {
+  "q": "ROW_NUMBER vs RANK vs DENSE_RANK?",
+  "a": "<p>For 160, 140, 130, 130, 110: ROW_NUMBER 1,2,3,4,5 (unique); RANK 1,2,3,3,5 (ties share, then skip); DENSE_RANK 1,2,3,3,4 (no gaps).</p>"
+ },
+ {
+  "q": "Top 3 salaries per department: which function?",
+  "a": "<p>If it means top 3 distinct salary levels (LeetCode 185), DENSE_RANK ≤ 3, which can return more than 3 people. ROW_NUMBER would wrongly drop a tied employee.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Second highest salary, returning NULL if none?",
+  "a": "<p>SELECT MAX(salary) FROM (SELECT salary, DENSE_RANK() OVER (ORDER BY salary DESC) r FROM employees) t WHERE r = 2. The aggregate guarantees one row with NULL when no second salary exists.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "How do you get the latest record per user?",
+  "a": "<p>ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY event_time DESC, id DESC) in a CTE, then keep rn = 1. Always add a unique tie-breaker.</p>"
+ },
+ {
+  "q": "How do you delete duplicate rows keeping one?",
+  "a": "<p>Number rows with ROW_NUMBER partitioned by the columns that define a duplicate; delete those with rn &gt; 1 (by primary key).</p>"
+ },
+ {
+  "q": "What does NTILE(4) do with 10 rows?",
+  "a": "<p>Buckets of 3, 3, 2, 2: the extra rows go to the first buckets. Ties can be split across buckets.</p>",
+  "gotcha": true
+ }
+]

@@ -1,0 +1,29 @@
+[
+ {
+  "q": "In what order does SQL execute the clauses of a query?",
+  "a": "<p>FROM/JOIN → WHERE → GROUP BY → HAVING → SELECT (including window functions) → DISTINCT → ORDER BY → LIMIT. That's why SELECT aliases can't be used in WHERE but can be used in ORDER BY.</p>"
+ },
+ {
+  "q": "WHERE vs HAVING?",
+  "a": "<p>WHERE filters individual rows before grouping and can't use aggregates. HAVING filters groups after GROUP BY and can use COUNT, SUM, AVG. Put row conditions in WHERE: grouping fewer rows is faster.</p>"
+ },
+ {
+  "q": "Why doesn't WHERE col = NULL work?",
+  "a": "<p>Any comparison with NULL is UNKNOWN, and WHERE keeps only TRUE rows. Use IS NULL / IS NOT NULL. Likewise <code>col &lt;&gt; 1</code> silently drops rows where col is NULL.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "COUNT(*) vs COUNT(col) vs COUNT(DISTINCT col)?",
+  "a": "<p>COUNT(*) counts rows; COUNT(col) counts non-NULL values of col; COUNT(DISTINCT col) counts distinct non-NULL values. AVG, SUM, MIN, MAX also ignore NULLs, so AVG divides by the non-NULL count.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Why does 3/4 return 0, and how do you fix it?",
+  "a": "<p>Integer division in PostgreSQL, SQLite and SQL Server. Multiply by 1.0 (or CAST to decimal) first: <code>100.0 * a / b</code>. Guard the denominator with NULLIF(b, 0).</p>",
+  "gotcha": true
+ },
+ {
+  "q": "UNION vs UNION ALL?",
+  "a": "<p>UNION removes duplicate rows (extra sort/hash work); UNION ALL keeps all rows and is faster. Use UNION ALL unless you need de-duplication.</p>"
+ }
+]

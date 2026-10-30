@@ -1,0 +1,19 @@
+[
+ {
+  "q": "How do you compute month-over-month growth?",
+  "a": "<p>Aggregate per month, then (x − LAG(x) OVER (ORDER BY month)) / NULLIF(LAG(x) OVER (ORDER BY month), 0) × 100. The first month is NULL.</p>"
+ },
+ {
+  "q": "LAG gives the previous row. Is that the previous day?",
+  "a": "<p>Not if days are missing. Check that the date gap equals 1, self-join on date − 1 day, or build a date spine first.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "How do you compute days between consecutive orders per customer?",
+  "a": "<p>order_date − LAG(order_date) OVER (PARTITION BY customer_id ORDER BY order_date), using the dialect's date difference (DATEDIFF, julianday, date subtraction).</p>"
+ },
+ {
+  "q": "How do you sessionise events?",
+  "a": "<p>Flag a new session when the gap from LAG(event_time) exceeds a threshold (e.g. 30 min), then a running SUM of the flag per user numbers the sessions.</p>"
+ }
+]

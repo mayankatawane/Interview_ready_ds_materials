@@ -1,0 +1,29 @@
+[
+ {
+  "q": "Explain INNER, LEFT, RIGHT, FULL and CROSS joins.",
+  "a": "<p>INNER keeps matching pairs only. LEFT keeps all left rows, NULLs where no match. RIGHT mirrors LEFT. FULL keeps everything from both sides. CROSS returns every combination (rows = left × right).</p>"
+ },
+ {
+  "q": "Your LEFT JOIN is behaving like an INNER JOIN. Why?",
+  "a": "<p>A condition on the right table was put in WHERE; rows with NULLs on the right fail it and disappear. Move that condition into the ON clause.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Revenue doubled after you joined orders to order_items. What happened?",
+  "a": "<p>Fan-out: each order matches several item rows, so the order amount is repeated. Aggregate at the right grain before joining, or check key uniqueness with GROUP BY key HAVING COUNT(*) &gt; 1.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "How do you find customers who never placed an order?",
+  "a": "<p>Anti-join: LEFT JOIN orders and keep rows where the order key IS NULL, or WHERE NOT EXISTS (correlated subquery). Avoid NOT IN when the subquery can contain NULL.</p>"
+ },
+ {
+  "q": "When would you use a self-join?",
+  "a": "<p>Comparing rows of the same table: employees vs their managers, a day vs the previous day, pairs of users in the same city, hierarchies.</p>"
+ },
+ {
+  "q": "How many rows does a LEFT JOIN return?",
+  "a": "<p>At least the number of left rows: each left row appears once per matching right row, or once with NULLs if it has none. It can be more than the left table if keys repeat on the right.</p>",
+  "gotcha": true
+ }
+]

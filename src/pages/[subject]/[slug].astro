@@ -74,6 +74,8 @@ const shortName = (s: string) => s.replace(/^\d+\.\s*/, '').split(/[:?,]| — /)
     </aside>
   </div>
   <script is:inline src={url('viz.js')}></script>
+  {t.data.subject === 'sql' && <script is:inline src={url('sql/data.js')}></script>}
+  {t.data.subject === 'sql' && <script is:inline src={url('sql/runner.js')}></script>}
   <script is:inline>
     (function () {
       const S = window.DSK, art = document.querySelector('article[data-slug]'), slug = art.dataset.slug;

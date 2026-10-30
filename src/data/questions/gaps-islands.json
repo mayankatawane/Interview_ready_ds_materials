@@ -1,0 +1,19 @@
+[
+ {
+  "q": "How do you find users with 3+ consecutive login days?",
+  "a": "<p>De-duplicate to one row per user per day; island key = date − ROW_NUMBER() OVER (PARTITION BY user ORDER BY date); GROUP BY user, key HAVING COUNT(*) ≥ 3. Or LAG(date, 2) and check a 2-day difference.</p>"
+ },
+ {
+  "q": "Why does date − row_number identify a streak?",
+  "a": "<p>Inside a consecutive run, both the date and the row number increase by 1 each step, so their difference is constant. A skipped day changes the difference, starting a new island.</p>"
+ },
+ {
+  "q": "Your streak query gives wrong lengths. What's a likely cause?",
+  "a": "<p>Duplicate rows on the same day: the row number jumps while the date doesn't. Use SELECT DISTINCT user_id, date first.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "How do you find missing dates or IDs?",
+  "a": "<p>LEAD(value) OVER (ORDER BY value) and keep rows where next − current &gt; 1; the gap is current + 1 to next − 1. Or LEFT JOIN a generated sequence.</p>"
+ }
+]

@@ -1,0 +1,23 @@
+[
+ {
+  "q": "Window function vs GROUP BY?",
+  "a": "<p>GROUP BY collapses each group into one row. A window function computes over a group of rows defined by OVER but keeps every row, so you can show detail and group values side by side.</p>"
+ },
+ {
+  "q": "Why can't you put a window function in WHERE?",
+  "a": "<p>Window functions are evaluated in the SELECT step, after WHERE, GROUP BY and HAVING. Compute it in a CTE or subquery and filter outside, or use QUALIFY in Snowflake/BigQuery/Databricks.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "What do PARTITION BY and ORDER BY inside OVER do?",
+  "a": "<p>PARTITION BY splits rows into independent groups (the window restarts per group). ORDER BY orders rows within each group; needed for ranking, LAG/LEAD and running totals, and it also changes the default frame.</p>"
+ },
+ {
+  "q": "What does SUM(salary) OVER () return?",
+  "a": "<p>The total over the whole result set, repeated on every row. Useful for percent of total.</p>"
+ },
+ {
+  "q": "Can you use a window function over an aggregate?",
+  "a": "<p>Yes: aggregates are computed before windows, so SUM(SUM(amount)) OVER (ORDER BY month) gives a cumulative total of monthly sums, and RANK() OVER (ORDER BY SUM(amount) DESC) ranks groups.</p>"
+ }
+]

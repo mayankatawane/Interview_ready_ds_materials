@@ -1,0 +1,23 @@
+[
+ {
+  "q": "How do you compute several metrics (counts, conditional sums, rates) in one query?",
+  "a": "<p>Conditional aggregation: SUM(CASE WHEN cond THEN 1 ELSE 0 END) for counts, SUM(CASE WHEN cond THEN amount ELSE 0 END) for conditional sums, AVG(CASE WHEN cond THEN 1.0 ELSE 0 END) for rates, COUNT(DISTINCT CASE WHEN cond THEN user_id END) for unique users.</p>"
+ },
+ {
+  "q": "What's wrong with COUNT(CASE WHEN cond THEN 1 ELSE 0 END)?",
+  "a": "<p>COUNT counts every non-NULL value, and 0 isn't NULL, so it counts all rows. Use SUM instead, or drop the ELSE so non-matches become NULL.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "How do you pivot rows into columns in SQL?",
+  "a": "<p>Group by the row key and use one conditional aggregate per output column, e.g. SUM(CASE WHEN status='completed' THEN amount ELSE 0 END) AS completed. Works in every dialect (some have a PIVOT keyword too).</p>"
+ },
+ {
+  "q": "How do you compute each group's percentage of the total?",
+  "a": "<p>100.0 * COUNT(*) / SUM(COUNT(*)) OVER () — the window sums the group counts across all groups. Or divide by a scalar subquery of the total.</p>"
+ },
+ {
+  "q": "Find customers who bought every product in a category.",
+  "a": "<p>Relational division: GROUP BY customer, HAVING COUNT(DISTINCT product_id) = (SELECT COUNT(*) FROM products WHERE category = …).</p>"
+ }
+]

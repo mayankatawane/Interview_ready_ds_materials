@@ -1,0 +1,24 @@
+[
+ {
+  "q": "How do you compute day-1 retention?",
+  "a": "<p>First login per user; LEFT JOIN de-duplicated logins on date = first + 1 day; retained users ÷ all users. The LEFT JOIN keeps non-returners in the denominator.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "How would you build a cohort retention table in SQL?",
+  "a": "<p>Cohort = each user's first period (MIN date truncated to week/month). Join activity back, compute periods since cohort, then COUNT(DISTINCT CASE WHEN period_n = k THEN user END) per cohort, divided by cohort size.</p>"
+ },
+ {
+  "q": "How do you compute funnel conversion?",
+  "a": "<p>Pivot events to per-user flags with MAX(CASE WHEN event = … THEN 1 ELSE 0 END), sum the flags per step, and divide each step by the previous. For a strict funnel, also check timestamps are in order.</p>"
+ },
+ {
+  "q": "How do you compute rolling 7-day active users?",
+  "a": "<p>Self-join a list of days to the activity table on activity_date BETWEEN day − 6 AND day, then COUNT(DISTINCT user_id) per day. COUNT DISTINCT isn't supported as a window function in most engines.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "What is DAU/MAU and what does it tell you?",
+  "a": "<p>Daily active users divided by monthly (30-day) active users: stickiness, the share of monthly users who come back on a typical day.</p>"
+ }
+]

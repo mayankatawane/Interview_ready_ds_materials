@@ -1,0 +1,23 @@
+[
+ {
+  "q": "Why can NOT IN return no rows at all?",
+  "a": "<p>If the subquery returns a NULL, x NOT IN (…, NULL) becomes x &lt;&gt; NULL = UNKNOWN for every row. Use NOT EXISTS or filter NULLs out of the subquery.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "CTE vs subquery: which is faster?",
+  "a": "<p>Usually the same; most engines inline CTEs. CTEs win on readability and reuse within one query. For results reused across queries or very heavy steps, a temp table may be better.</p>"
+ },
+ {
+  "q": "What is a correlated subquery and when is it a problem?",
+  "a": "<p>A subquery that references the outer row, so it's logically re-run per row (e.g. compare salary to own department's average). It can be slow on large tables; a window function or a join to a pre-aggregated table usually replaces it.</p>"
+ },
+ {
+  "q": "What are recursive CTEs used for?",
+  "a": "<p>Hierarchies (org charts, category trees, bill of materials) and generating sequences such as a date spine to fill missing days. Anchor query + recursive part joined to the CTE, combined with UNION ALL.</p>"
+ },
+ {
+  "q": "EXISTS vs IN?",
+  "a": "<p>EXISTS stops at the first match and is NULL-safe in the NOT form; IN compares against a list. Modern optimisers often plan them the same for the positive case, but prefer NOT EXISTS over NOT IN.</p>"
+ }
+]

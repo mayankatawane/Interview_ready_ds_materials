@@ -284,3 +284,28 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 
 /* search */
 .pagefind-ui { --pagefind-ui-primary: var(--accent); --pagefind-ui-text: var(--ink); --pagefind-ui-background: var(--surface); --pagefind-ui-border: var(--line); --pagefind-ui-tag: var(--accent-soft); --pagefind-ui-font: var(--f-body); }
+
+/* ---------- SQL runner ---------- */
+.sqlrun { border: 1px solid var(--line); border-left: 3px solid var(--sub-sql); border-radius: 10px; background: var(--surface); margin: 1.2em 0; overflow: hidden; }
+.sqlbar { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; justify-content: space-between; padding: 8px 10px; border-bottom: 1px solid var(--line); background: var(--code-bg); }
+.sqltag { font: 500 .74rem var(--f-mono); color: var(--muted); letter-spacing: .02em; }
+.sqltag b { color: var(--sub-sql); font-weight: 600; }
+.sqlbtns { display: flex; gap: 6px; }
+.sqlbtns .btn { padding: 4px 11px; font-size: .8rem; border-color: var(--sub-sql); color: var(--sub-sql); }
+.sqlbtns .btn.solid { background: var(--sub-sql); color: var(--surface); }
+.sqlrun textarea { display: block; width: 100%; box-sizing: border-box; border: 0; resize: vertical; font: .82rem/1.55 var(--f-mono); padding: 10px 12px; background: var(--code-bg); color: var(--ink); white-space: pre; overflow-x: auto; tab-size: 2; }
+.sqlrun textarea:focus { outline: 2px solid var(--sub-sql); outline-offset: -2px; }
+.sqlout:empty { display: none; }
+.sqlout { padding: 4px 12px 10px; }
+.sqlout .tbl { margin: 8px 0 4px; }
+.sqlout table { font-size: .8rem; }
+.sqlmeta { font-size: .78rem; color: var(--muted); margin: 4px 0; }
+.sqlerr { font: .8rem var(--f-mono); color: var(--bad); background: var(--bad-soft); border-radius: 6px; padding: 6px 8px; margin: 8px 0 4px; overflow-wrap: anywhere; }
+.sqltname { font: 600 .78rem var(--f-mono); color: var(--sub-sql); margin: 10px 0 0; }
+.null { color: var(--muted); font-style: italic; }
+details.solution { border: 1px dashed var(--line); border-radius: 10px; padding: 8px 12px; margin: .6em 0 1.4em; }
+details.solution > summary { cursor: pointer; font-weight: 600; color: var(--sub-sql); }
+details.solution[open] > summary { margin-bottom: 6px; }
+.callout-problem { --cc: var(--sub-sql); --cb: var(--code-bg); }
+.callout-example { --cc: var(--k6); --cb: var(--code-bg); }
+@media (max-width: 640px) { .sqlrun textarea { white-space: pre-wrap; overflow-wrap: anywhere; } }

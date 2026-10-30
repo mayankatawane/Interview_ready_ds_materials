@@ -1,0 +1,24 @@
+[
+ {
+  "q": "Why is BETWEEN '2026-03-01' AND '2026-03-31' risky for timestamps?",
+  "a": "<p>'2026-03-31' means midnight, so almost all of March 31 is excluded. Use a half-open range: &gt;= '2026-03-01' AND &lt; '2026-04-01'.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "How do you compute a median without PERCENTILE_CONT?",
+  "a": "<p>ROW_NUMBER() OVER (ORDER BY x) and COUNT(*) OVER (); average the rows where rn IN ((n+1)/2, (n+2)/2) using integer division.</p>"
+ },
+ {
+  "q": "How would you speed up a slow query?",
+  "a": "<p>Check EXPLAIN; read less (needed columns, filter early, partition pruning); sargable filters (don't wrap indexed columns in functions); index join/filter columns; aggregate before joins; replace correlated subqueries with joins or windows; UNION ALL over UNION.</p>"
+ },
+ {
+  "q": "What does 'sargable' mean?",
+  "a": "<p>A predicate the engine can answer using an index, e.g. order_date &gt;= '2026-01-01'. Wrapping the column in a function (YEAR(order_date) = 2026) usually prevents index use.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "COALESCE vs NULLIF?",
+  "a": "<p>COALESCE(a, b) returns the first non-NULL argument (defaults). NULLIF(a, b) returns NULL when a = b, mainly to avoid division by zero: x / NULLIF(y, 0).</p>"
+ }
+]

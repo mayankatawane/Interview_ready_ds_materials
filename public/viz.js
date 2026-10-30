@@ -1567,6 +1567,250 @@ VIZ["cost-calc"] = box => {
   [rq, ti, to, pi, po].forEach(i => i.addEventListener("input", draw)); ch.addEventListener("input", draw); draw();
 };
 
+
+/* ================= SQL ================= */
+const PCOL = ["--k3", "--c2", "--k6", "--k4", "--k5"];
+function htable(cols, rows, opts = {}) {
+  // rows: array of {cells:[], cls?, style?}
+  return `<div class="tbl"><table><tr>${cols.map((c, i) => `<th${opts.num && opts.num[i] ? ' class="num"' : ""}>${c}</th>`).join("")}</tr>${rows.map(r => `<tr${r.style ? ` style="${r.style}"` : ""}>${r.cells.map((v, i) => `<td${opts.num && opts.num[i] ? ' class="num"' : ""}>${v === null ? '<span class="null">NULL</span>' : v}</td>`).join("")}</tr>`).join("")}</table></div>`;
+}
+const tint = (v, a = 14) => `background:color-mix(in srgb, var(${v}) ${a}%, transparent)`;
+
+VIZ["sql-order"] = box => {
+  head(box, "The SQL assembly line", "You write SELECT first, but the database runs the clauses in a different order. Step through one query and watch the table change at each station.");
+  box.appendChild(el("pre", { style: "margin:6px 0 10px;white-space:pre-wrap" }, `SELECT dept, AVG(salary) AS avg_sal
+FROM employees
+WHERE hire_year >= 2020
+GROUP BY dept
+HAVING COUNT(*) >= 2
+ORDER BY avg_sal DESC
+LIMIT 1;`));
+  const E = [["Asha", "DS", 150, 2019], ["Rohan", "DS", 120, 2020], ["Meera", "DS", 120, 2021], ["Kabir", "DS", 95, 2022], ["Arjun", "Eng", 130, 2019], ["Priya", "Eng", 130, 2020], ["Vikram", "Eng", 110, 2021], ["Sara", "Eng", 140, 2022], ["Isha", "Sales", 70, 2021]];
+  const kept = E.filter(r => r[3] >= 2020);
+  const groups = ["DS", "Eng", "Sales"].map(d => { const g = kept.filter(r => r[1] === d); return [d, g.length, g.reduce((s, r) => s + r[2], 0) / g.length]; });
+  const S = [
+    ["1 FROM / JOIN", "Fetch the table(s) and join them. All 9 rows enter the line.", htable(["name", "dept", "salary (k)", "hire_year"], E.map(r => ({ cells: r })), { num: [0, 0, 1, 1] })],
+    ["2 WHERE", "Filter individual rows. Asha and Arjun (hired 2019) are dropped. Aliases like avg_sal don't exist yet, so WHERE can't use them.", htable(["name", "dept", "salary (k)", "hire_year"], E.map(r => ({ cells: r, style: r[3] < 2020 ? "opacity:.35;text-decoration:line-through" : "" })), { num: [0, 0, 1, 1] })],
+    ["3 GROUP BY", "Rows are put into one bucket per dept. From here on, each bucket becomes one row.", htable(["dept", "rows in bucket"], groups.map((g, i) => ({ cells: [g[0], kept.filter(r => r[1] === g[0]).map(r => r[0]).join(", ")], style: tint(PCOL[i]) })))],
+    ["4 HAVING", "Filter whole groups using aggregates. Sales has only 1 row, so it's dropped.", htable(["dept", "COUNT(*)", "AVG(salary)"], groups.map((g, i) => ({ cells: [g[0], g[1], g[2].toFixed(1)], style: g[1] < 2 ? "opacity:.35;text-decoration:line-through" : tint(PCOL[i]) })), { num: [0, 1, 1] })],
+    ["5 SELECT", "Compute the output columns and name them. avg_sal is born here. Window functions also run at this step.", htable(["dept", "avg_sal"], groups.filter(g => g[1] >= 2).map(g => ({ cells: [g[0], g[2].toFixed(1)] })), { num: [0, 1] })],
+    ["6 DISTINCT", "Remove duplicate output rows (only if you wrote DISTINCT). Nothing to remove here.", htable(["dept", "avg_sal"], groups.filter(g => g[1] >= 2).map(g => ({ cells: [g[0], g[2].toFixed(1)] })), { num: [0, 1] })],
+    ["7 ORDER BY", "Sort. ORDER BY runs after SELECT, so it CAN use the alias avg_sal.", htable(["dept", "avg_sal"], groups.filter(g => g[1] >= 2).sort((a, b) => b[2] - a[2]).map(g => ({ cells: [g[0], g[2].toFixed(1)] })), { num: [0, 1] })],
+    ["8 LIMIT", "Keep the first row only. Final answer: Eng.", htable(["dept", "avg_sal"], groups.filter(g => g[1] >= 2).sort((a, b) => b[2] - a[2]).slice(0, 1).map(g => ({ cells: [g[0], g[2].toFixed(1)] })), { num: [0, 1] })]
+  ];
+  const strip = el("div", { style: "display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px" }); box.appendChild(strip);
+  const ctrl = ctrlRow(box); const bp = button(ctrl, "← Back"), bn = button(ctrl, "Next station →", "btn solid");
+  const cap = el("p", { style: "margin:8px 0 0;font-size:.9rem", "aria-live": "polite" }); box.appendChild(cap);
+  const tb = el("div"); box.appendChild(tb);
+  note(box, "Memory trick: <b>F</b>at <b>W</b>hales <b>G</b>row <b>H</b>uge, <b>S</b>o <b>D</b>on't <b>O</b>ver<b>L</b>oad them = FROM, WHERE, GROUP BY, HAVING, SELECT, DISTINCT, ORDER BY, LIMIT.");
+  let k = 0;
+  const draw = () => {
+    strip.innerHTML = S.map((s, i) => `<span style="font:500 .72rem var(--f-mono);padding:3px 7px;border-radius:999px;border:1px solid ${i === k ? "var(--sub-sql)" : "var(--line)"};${i === k ? "background:var(--sub-sql);color:var(--surface)" : i < k ? "color:var(--sub-sql)" : "color:var(--muted)"}">${s[0]}</span>`).join("");
+    cap.innerHTML = `<strong>${S[k][0].slice(2)}:</strong> ${S[k][1]}`; tb.innerHTML = S[k][2]; bp.disabled = k === 0; bn.disabled = k === S.length - 1;
+  };
+  bn.addEventListener("click", () => { k = Math.min(S.length - 1, k + 1); draw(); }); bp.addEventListener("click", () => { k = Math.max(0, k - 1); draw(); }); draw();
+};
+
+VIZ["join-lab"] = box => {
+  head(box, "Join lab", "Left table: customers. Right table: orders. Pick a join and see which rows survive. Green = matched, orange = only in left (right side filled with NULL), purple = only in right.");
+  const L = [[1, "Aman"], [2, "Bela"], [3, "Chirag"], [4, "Diya"]];
+  const R = [[101, 1, 1200], [102, 1, 800], [103, 2, 2500], [104, 9, 300]];
+  const two = el("div", { class: "cols" }); box.appendChild(two);
+  two.innerHTML = `<div><p class="sqltname">customers (left)</p>${htable(["id", "name"], L.map(r => ({ cells: r })))}</div><div><p class="sqltname">orders (right)</p>${htable(["order_id", "customer_id", "amount"], R.map(r => ({ cells: r, style: r[1] === 9 ? tint("--k3") : "" })), { num: [1, 1, 1] })}</div>`;
+  const ctrl = ctrlRow(box);
+  const types = [["INNER", "INNER JOIN"], ["LEFT", "LEFT JOIN"], ["RIGHT", "RIGHT JOIN"], ["FULL", "FULL OUTER JOIN"], ["ANTI", "LEFT JOIN … WHERE o.id IS NULL"], ["CROSS", "CROSS JOIN"]];
+  const btns = types.map(([k, t]) => { const b = button(ctrl, k === "ANTI" ? "ANTI (left only)" : k); b.dataset.k = k; return b; });
+  const sqlp = el("pre", { style: "margin:8px 0;white-space:pre-wrap" }); box.appendChild(sqlp);
+  const out = el("div"); box.appendChild(out); const st = statsRow(box); const nt = note(box, "");
+  let cur = "INNER";
+  const draw = () => {
+    btns.forEach(b => b.classList.toggle("solid", b.dataset.k === cur));
+    const rows = [];
+    if (cur === "CROSS") { L.forEach(l => R.forEach(r => rows.push({ cells: [l[0], l[1], r[0], r[2]], style: "" }))); }
+    else {
+      L.forEach(l => { const m = R.filter(r => r[1] === l[0]); if (m.length) { if (cur !== "ANTI") m.forEach(r => rows.push({ cells: [l[0], l[1], r[0], r[2]], style: tint("--good", 16) })); } else if (["LEFT", "FULL", "ANTI"].includes(cur)) rows.push({ cells: [l[0], l[1], null, null], style: tint("--c2", 18) }); });
+      if (["RIGHT", "FULL"].includes(cur)) R.filter(r => !L.some(l => l[0] === r[1])).forEach(r => rows.push({ cells: [null, null, r[0], r[2]], style: tint("--k3", 18) }));
+      if (cur === "RIGHT") rows.sort((a, b) => (a.cells[2] || 0) - (b.cells[2] || 0));
+    }
+    const t = types.find(x => x[0] === cur)[1];
+    sqlp.textContent = cur === "ANTI" ? "SELECT c.id, c.name, o.id, o.amount\nFROM customers c LEFT JOIN orders o ON o.customer_id = c.id\nWHERE o.id IS NULL;   -- customers who never ordered" : cur === "CROSS" ? "SELECT c.id, c.name, o.id, o.amount\nFROM customers c CROSS JOIN orders o;   -- every pair, no ON" : `SELECT c.id, c.name, o.id, o.amount\nFROM customers c ${t} orders o ON o.customer_id = c.id;`;
+    out.innerHTML = htable(["c.id", "c.name", "o.id", "o.amount"], rows, { num: [1, 0, 1, 1] });
+    setStats(st, [["Left rows", L.length], ["Right rows", R.length], ["Result rows", rows.length]]);
+    nt.innerHTML = { INNER: "Only matches. Aman appears <b>twice</b> because he has two orders: joins multiply rows, so a SUM after a join can double-count.", LEFT: "Every customer stays. Chirag and Diya have no orders, so their order columns are NULL.", RIGHT: "Every order stays. Order 104 points to customer 9, who doesn't exist (an orphan row).", FULL: "Everything from both sides: matches + left-only + right-only.", ANTI: "The classic “customers who never ordered”. Filter on a right-side column that can't be NULL in a real match (its key).", CROSS: "4 × 4 = 16 rows: every combination. Useful to build a full grid (e.g. every user × every date), dangerous by accident." }[cur];
+  };
+  btns.forEach(b => b.addEventListener("click", () => { cur = b.dataset.k; draw(); })); draw();
+};
+
+VIZ["group-buckets"] = box => {
+  head(box, "GROUP BY = sorting rows into buckets", "Each order is a chip. Choose what to group by and what to compute. Every bucket collapses into one output row. HAVING then removes whole buckets.");
+  const O = [[101, "Aman", "Pune", 1200, "completed"], [102, "Aman", "Pune", 800, "cancelled"], [103, "Bela", "Mumbai", 2500, "completed"], [104, "Aman", "Pune", 1500, "completed"], [105, "Chirag", "Pune", 300, "completed"], [106, "Bela", "Mumbai", 700, "returned"], [107, "Diya", "Delhi", 4000, "completed"], [108, "Chirag", "Pune", 900, "completed"], [110, "Diya", "Delhi", 1100, "cancelled"]];
+  const ctrl = ctrlRow(box);
+  const gb = selectBox(ctrl, "gb-k", "GROUP BY", [["2", "city"], ["4", "status"], ["1", "customer"]], "2");
+  const ag = selectBox(ctrl, "gb-a", "Compute", [["count", "COUNT(*)"], ["sum", "SUM(amount)"], ["avg", "AVG(amount)"], ["cond", "SUM(CASE WHEN status='completed' …)"]], "sum");
+  const ctrl2 = ctrlRow(box); const hv = slider(ctrl2, "gb-h", "HAVING value >", 0, 5000, 100, 0, v => v);
+  const wrap = el("div", { style: "display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:8px" }); box.appendChild(wrap);
+  const sqlp = el("pre", { style: "margin:10px 0 0;white-space:pre-wrap" }); box.appendChild(sqlp);
+  const draw = () => {
+    const k = +gb.value, keys = [...new Set(O.map(r => r[k]))];
+    const name = { 1: "customer", 2: "city", 4: "status" }[k];
+    const f = { count: g => g.length, sum: g => g.reduce((s, r) => s + r[3], 0), avg: g => Math.round(g.reduce((s, r) => s + r[3], 0) / g.length), cond: g => g.reduce((s, r) => s + (r[4] === "completed" ? r[3] : 0), 0) }[ag.value];
+    const expr = { count: "COUNT(*)", sum: "SUM(amount)", avg: "AVG(amount)", cond: "SUM(CASE WHEN status = 'completed' THEN amount ELSE 0 END)" }[ag.value];
+    wrap.innerHTML = keys.map((key, i) => {
+      const g = O.filter(r => r[k] === key), v = f(g), out = v <= +hv.value;
+      return `<div style="border:1.5px solid var(${PCOL[i % 5]});border-radius:10px;padding:8px;${out ? "opacity:.35" : ""}"><div style="font:600 .8rem var(--f-mono);color:var(${PCOL[i % 5]})">${key}</div><div style="display:flex;flex-wrap:wrap;gap:3px;margin:6px 0">${g.map(r => `<span title="order ${r[0]}" style="font:.68rem var(--f-mono);padding:1px 5px;border-radius:4px;${tint(PCOL[i % 5], 20)};${ag.value === "cond" && r[4] !== "completed" ? "text-decoration:line-through" : ""}">${r[3]}</span>`).join("")}</div><div style="font:600 1rem var(--f-mono)">→ ${v.toLocaleString("en-IN")}</div>${out ? '<div class="sqlmeta">removed by HAVING</div>' : ""}</div>`;
+    }).join("");
+    sqlp.textContent = `SELECT ${name}, ${expr} AS value\nFROM orders\nGROUP BY ${name}${+hv.value > 0 ? `\nHAVING ${expr} > ${hv.value}` : ""};`;
+  };
+  [gb, ag].forEach(s => s.addEventListener("change", draw)); hv.addEventListener("input", draw); draw();
+};
+
+VIZ["win-partition"] = box => {
+  head(box, "GROUP BY squashes rows; a window keeps them", "Same data, two ways. Switch modes, pick a function, and toggle ORDER BY inside the window to see a running calculation appear.");
+  const E = [["Asha", "DS", 150], ["Rohan", "DS", 120], ["Meera", "DS", 120], ["Kabir", "DS", 95], ["Neha", "Eng", 160], ["Sara", "Eng", 140], ["Arjun", "Eng", 130], ["Dev", "Sales", 90], ["Isha", "Sales", 70]];
+  const ctrl = ctrlRow(box);
+  const md = selectBox(ctrl, "wp-m", "Mode", [["win", "Window (OVER)"], ["grp", "GROUP BY"]], "win");
+  const fn = selectBox(ctrl, "wp-f", "Function", [["SUM", "SUM(salary)"], ["AVG", "AVG(salary)"], ["COUNT", "COUNT(*)"], ["MAX", "MAX(salary)"], ["ROW_NUMBER", "ROW_NUMBER()"], ["RANK", "RANK()"], ["DENSE_RANK", "DENSE_RANK()"]], "SUM");
+  const ob = checkbox(ctrl, "wp-o", "ORDER BY salary DESC inside the window", false);
+  const sqlp = el("pre", { style: "margin:8px 0;white-space:pre-wrap" }); box.appendChild(sqlp);
+  const out = el("div"); box.appendChild(out); const nt = note(box, "");
+  const depts = ["DS", "Eng", "Sales"];
+  const draw = () => {
+    const f = fn.value, rankish = ["ROW_NUMBER", "RANK", "DENSE_RANK"].includes(f), ordered = ob.checked || rankish;
+    ob.disabled = md.value === "grp" || rankish; if (rankish) ob.checked = true;
+    const call = f === "COUNT" ? "COUNT(*)" : rankish ? f + "()" : `${f}(salary)`;
+    if (md.value === "grp") {
+      const agg = rankish ? "SUM(salary)" : call;
+      sqlp.textContent = `SELECT dept, ${agg} AS result\nFROM employees\nGROUP BY dept;` + (rankish ? "\n-- ranking functions only exist as window functions" : "");
+      out.innerHTML = htable(["dept", "result"], depts.map((d, i) => { const g = E.filter(r => r[1] === d).map(r => r[2]); const ff = rankish ? "SUM" : f; const v = ff === "SUM" ? g.reduce((a, b) => a + b, 0) : ff === "AVG" ? g.reduce((a, b) => a + b, 0) / g.length : ff === "COUNT" ? g.length : Math.max(...g); return { cells: [d, +v.toFixed(1)], style: tint(PCOL[i]) }; }), { num: [0, 1] });
+      nt.innerHTML = "9 rows in, <b>3 rows out</b>. You lose the employee names. That's the key difference.";
+      return;
+    }
+    sqlp.textContent = `SELECT name, dept, salary,\n       ${call} OVER (PARTITION BY dept${ordered ? " ORDER BY salary DESC" : ""}) AS result\nFROM employees;`;
+    const rows = [];
+    depts.forEach((d, i) => {
+      const g = E.filter(r => r[1] === d).sort((a, b) => b[2] - a[2]);
+      g.forEach((r, j) => {
+        let v;
+        const frame = ordered ? g.filter(x => x[2] >= r[2]) : g; // RANGE default: peers included
+        if (f === "SUM") v = frame.reduce((s, x) => s + x[2], 0);
+        if (f === "AVG") v = +(frame.reduce((s, x) => s + x[2], 0) / frame.length).toFixed(1);
+        if (f === "COUNT") v = frame.length;
+        if (f === "MAX") v = Math.max(...frame.map(x => x[2]));
+        if (f === "ROW_NUMBER") v = j + 1;
+        if (f === "RANK") v = g.filter(x => x[2] > r[2]).length + 1;
+        if (f === "DENSE_RANK") v = new Set(g.filter(x => x[2] > r[2]).map(x => x[2])).size + 1;
+        rows.push({ cells: [r[0], d, r[2], `<strong>${v}</strong>`], style: tint(PCOL[i]) });
+      });
+    });
+    out.innerHTML = htable(["name", "dept", "salary (k)", "result"], rows, { num: [0, 0, 1, 1] });
+    nt.innerHTML = rankish ? "Numbering restarts in each coloured partition. Look at Rohan and Meera (both 120): ROW_NUMBER splits them, RANK and DENSE_RANK tie them." : ordered ? "With ORDER BY, the frame becomes “from the start of the partition up to this row” → a <b>running</b> " + f + ". Note Rohan and Meera get the same value: the default frame (RANGE) includes ties together." : "Without ORDER BY, every row sees its <b>whole partition</b>: all 9 rows kept, each showing its department's " + f + ".";
+  };
+  [md, fn].forEach(s => s.addEventListener("change", draw)); ob.addEventListener("change", draw); draw();
+};
+
+VIZ["rank-podium"] = box => {
+  head(box, "ROW_NUMBER vs RANK vs DENSE_RANK: the race", "Runners finish a 100 m race. Pick a scenario and compare the three numbering styles.");
+  const ctrl = ctrlRow(box);
+  const sc = selectBox(ctrl, "rp-s", "Scenario", [["0", "No ties"], ["1", "Tie for 2nd place"], ["2", "Three-way tie for 1st"]], "1");
+  const out = el("div"); box.appendChild(out); const nt = note(box, "");
+  const SC = [[["Asha", 10.1], ["Bela", 10.4], ["Chirag", 10.6], ["Diya", 10.9], ["Eshan", 11.2]], [["Asha", 10.1], ["Bela", 10.4], ["Chirag", 10.4], ["Diya", 10.9], ["Eshan", 11.2]], [["Asha", 10.1], ["Bela", 10.1], ["Chirag", 10.1], ["Diya", 10.9], ["Eshan", 11.2]]];
+  const badge = (v, c) => `<span style="display:inline-block;min-width:1.8em;text-align:center;font:600 .82rem var(--f-mono);padding:2px 6px;border-radius:6px;${tint(c, 22)}">${v}</span>`;
+  const draw = () => {
+    const R = SC[+sc.value];
+    out.innerHTML = htable(["runner", "time (s)", "ROW_NUMBER", "RANK", "DENSE_RANK"], R.map((r, i) => {
+      const rk = R.filter(x => x[1] < r[1]).length + 1, dr = new Set(R.filter(x => x[1] < r[1]).map(x => x[1])).size + 1, tie = R.filter(x => x[1] === r[1]).length > 1;
+      return { cells: [r[0], r[1].toFixed(1), badge(i + 1, "--k6"), badge(rk, "--c2"), badge(dr, "--k3")], style: tie ? tint("--c2", 8) : "" };
+    }), { num: [0, 1, 0, 0, 0] });
+    nt.innerHTML = ["With no ties, all three give 1, 2, 3, 4, 5.", "Bela and Chirag tie. <b>ROW_NUMBER</b> breaks the tie arbitrarily (2, 3). <b>RANK</b> gives both 2, then <b>skips</b> to 4, like Olympic medals. <b>DENSE_RANK</b> gives both 2, then 3: no gaps.", "Three share 1st. RANK jumps to 4. DENSE_RANK goes to 2. “Top 2 distinct times” needs DENSE_RANK ≤ 2 (4 runners); “top 2 positions” needs RANK ≤ 2 (3 runners)."][+sc.value];
+  };
+  sc.addEventListener("change", draw); draw();
+  note(box, "Memory trick: ROW_NUMBER = ticket numbers (always unique). RANK = Olympic podium (ties share, next place skipped). DENSE_RANK = salary levels (ties share, no gaps).");
+};
+
+VIZ["frame-slider"] = box => {
+  head(box, "Window frames: the sliding window", "North region's daily revenue. Choose how many rows before and after the current row the frame covers, then move the current row. The line shows the result for every row.");
+  const D = [100, 120, 90, 150, 150, 80, 200, 170], days = ["Mar 1", "2", "3", "4", "5", "6", "7", "8"];
+  const ctrl = ctrlRow(box);
+  const fnS = selectBox(ctrl, "fs-f", "Function", [["AVG", "AVG"], ["SUM", "SUM"]], "AVG");
+  const pre = slider(ctrl, "fs-p", "PRECEDING", 0, 8, 1, 2, v => v === 8 ? "UNBOUNDED" : v);
+  const fol = slider(ctrl, "fs-n", "FOLLOWING", 0, 3, 1, 0, v => v);
+  const ctrl2 = ctrlRow(box); const cur = slider(ctrl2, "fs-c", "Current row", 0, 7, 1, 4, v => days[v].length < 3 ? "Mar " + days[v] : days[v]);
+  const cv = addCanvas(box, 220, "Bar chart of daily revenue with the frame highlighted");
+  const sqlp = el("pre", { style: "margin:8px 0;white-space:pre-wrap" }); box.appendChild(sqlp);
+  const st = statsRow(box);
+  const val = (i) => { const p = +pre.value === 8 ? i : +pre.value, a = Math.max(0, i - p), b = Math.min(7, i + +fol.value); const s = D.slice(a, b + 1); return [a, b, fnS.value === "SUM" ? s.reduce((x, y) => x + y, 0) : s.reduce((x, y) => x + y, 0) / s.length]; };
+  onDraw(() => {
+    const { x, w, h } = prep(cv), pad = { l: 34, r: 10, t: 12, b: 24 };
+    const all = D.map((_, i) => val(i)[2]), mx = Math.max(...D, ...all) * 1.1;
+    const X = i => pad.l + (i + 0.5) * (w - pad.l - pad.r) / 8, bw = (w - pad.l - pad.r) / 8 * 0.6, Y = lin(0, mx, h - pad.b, pad.t);
+    frame(x, w, h, pad);
+    const [a, b, v] = val(+cur.value);
+    x.fillStyle = css("--accent-soft") || "rgba(0,0,0,.05)"; x.fillRect(X(a) - bw * 0.8, pad.t, X(b) - X(a) + bw * 1.6, h - pad.t - pad.b);
+    D.forEach((d, i) => { x.fillStyle = i === +cur.value ? css("--sub-sql") : i >= a && i <= b ? css("--k3") : css("--line"); x.fillRect(X(i) - bw / 2, Y(d), bw, h - pad.b - Y(d)); text(x, days[i], X(i), h - 8, css("--muted"), "center"); });
+    x.strokeStyle = css("--c2"); x.lineWidth = 2; x.beginPath(); all.forEach((v2, i) => i ? x.lineTo(X(i), Y(v2)) : x.moveTo(X(i), Y(v2))); x.stroke(); all.forEach((v2, i) => dot(x, X(i), Y(v2), 3, css("--c2")));
+    text(x, Math.round(mx), 4, pad.t + 8);
+    const p = +pre.value === 8 ? "UNBOUNDED PRECEDING" : `${pre.value} PRECEDING`, n = +fol.value ? `${fol.value} FOLLOWING` : "CURRENT ROW";
+    sqlp.textContent = `${fnS.value}(revenue) OVER (ORDER BY sale_date\n    ROWS BETWEEN ${p} AND ${n}) AS result`;
+    setStats(st, [["Frame rows", `${b - a + 1} (${days[a].length < 3 ? "Mar " + days[a] : days[a]} → ${days[b].length < 3 ? "Mar " + days[b] : days[b]})`], ["Values", D.slice(a, b + 1).join(" + ")], ["Result", +v.toFixed(1)]]);
+  });
+  [pre, fol, cur].forEach(s => s.addEventListener("input", () => ACTIVE.forEach(f => f()))); fnS.addEventListener("change", () => ACTIVE.forEach(f => f()));
+  legend(box, [["--sub-sql", "current row"], ["--k3", "rows inside the frame"], ["--c2", "result line (every row)"]]);
+  note(box, "Try: PRECEDING = UNBOUNDED, FOLLOWING = 0 with SUM → running total. PRECEDING = 6 with AVG → 7-day moving average. Note the first rows average fewer days (warm-up).");
+};
+
+VIZ["lag-arrows"] = box => {
+  head(box, "LAG and LEAD: shifting a column", "LAG looks back n rows, LEAD looks forward. Think of photocopying the column and sliding the copy down (LAG) or up (LEAD).");
+  const D = [["Jan", 400], ["Feb", 460], ["Mar", 430], ["Apr", 520], ["May", 600], ["Jun", 570]];
+  const ctrl = ctrlRow(box);
+  const fn = selectBox(ctrl, "la-f", "Function", [["LAG", "LAG"], ["LEAD", "LEAD"]], "LAG");
+  const n = slider(ctrl, "la-n", "offset n", 1, 3, 1, 1, v => v);
+  const dv = checkbox(ctrl, "la-d", "default 0 instead of NULL", false);
+  const sqlp = el("pre", { style: "margin:8px 0;white-space:pre-wrap" }); box.appendChild(sqlp);
+  const out = el("div"); box.appendChild(out); const nt = note(box, "");
+  const draw = () => {
+    const k = +n.value, lag = fn.value === "LAG";
+    sqlp.textContent = `SELECT month, revenue,\n  ${fn.value}(revenue, ${k}${dv.checked ? ", 0" : ""}) OVER (ORDER BY month) AS other,\n  revenue - ${fn.value}(revenue, ${k}) OVER (ORDER BY month) AS diff,\n  ROUND(100.0 * (revenue - ${fn.value}(revenue, ${k}) OVER (ORDER BY month))\n        / ${fn.value}(revenue, ${k}) OVER (ORDER BY month), 1) AS pct\nFROM monthly;`;
+    out.innerHTML = htable(["month", "revenue", `${fn.value}(…,${k})`, "", "diff", "% change"], D.map((r, i) => {
+      const j = lag ? i - k : i + k, o = D[j] ? D[j][1] : null, src = D[j] ? D[j][0] : "";
+      return { cells: [r[0], r[1], o === null ? (dv.checked ? "0" : null) : `<strong>${o}</strong>`, o === null ? "" : `<span class="sqlmeta">${lag ? "↑" : "↓"} from ${src}</span>`, o === null ? null : (r[1] - o > 0 ? "+" : "") + (r[1] - o), o === null ? null : (100 * (r[1] - o) / o).toFixed(1) + "%"], style: o === null ? tint("--c2", 10) : "" };
+    }), { num: [0, 1, 1, 0, 1, 1] });
+    nt.innerHTML = lag ? `The first ${k} row${k > 1 ? "s have" : " has"} nothing ${k} step${k > 1 ? "s" : ""} back, so LAG returns NULL (or your default). Month-over-month growth = (this − previous) / previous.` : `The last ${k} row${k > 1 ? "s have" : " has"} nothing ahead, so LEAD returns NULL. Use LEAD for “time until the next event”.`;
+  };
+  [fn].forEach(s => s.addEventListener("change", draw)); n.addEventListener("input", draw); dv.addEventListener("change", draw); draw();
+};
+
+VIZ["islands"] = box => {
+  head(box, "Gaps and islands: find login streaks", "Tap the days to switch a login on or off. The trick: date − ROW_NUMBER() stays constant inside a run of consecutive days, so it works as a group label.");
+  const on = [1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0, 1, 1];
+  const cal = el("div", { style: "display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:6px 0 10px" }); box.appendChild(cal);
+  const out = el("div"); box.appendChild(out); const st = statsRow(box);
+  const draw = () => {
+    const ds = on.map((v, i) => v ? i + 1 : null).filter(Boolean);
+    const grp = {}; ds.forEach((d, i) => { const g = d - (i + 1); (grp[g] = grp[g] || []).push(d); });
+    const gk = Object.keys(grp).map(Number), col = g => PCOL[gk.indexOf(g) % 5];
+    cal.innerHTML = on.map((v, i) => { const d = i + 1, g = v ? d - (ds.indexOf(d) + 1) : null; return `<button type="button" data-i="${i}" style="font:500 .78rem var(--f-mono);padding:8px 0;border-radius:8px;cursor:pointer;border:1.5px solid ${v ? `var(${col(g)})` : "var(--line)"};${v ? tint(col(g), 22) : "background:transparent"};color:var(--ink)">${d}<br><span style="font-size:.62rem;color:var(--muted)">Mar</span></button>`; }).join("");
+    out.innerHTML = htable(["login_date", "ROW_NUMBER()", "day − rn  (island key)"], ds.map((d, i) => ({ cells: [`Mar ${d}`, i + 1, `<strong>${d - (i + 1)}</strong>`], style: tint(col(d - (i + 1)), 16) })), { num: [0, 1, 1] });
+    const lens = gk.map(g => grp[g].length);
+    setStats(st, [["Logins", ds.length], ["Streaks", gk.length], ["Longest streak", lens.length ? Math.max(...lens) + " days" : "–"]]);
+    cal.querySelectorAll("button").forEach(b => b.addEventListener("click", () => { on[+b.dataset.i] ^= 1; draw(); }));
+  };
+  draw();
+  note(box, "In SQL: GROUP BY user_id, date(login_date, '-' || rn || ' days'), then COUNT(*) per group gives each streak's length. Remember to remove duplicate logins on the same day first.");
+};
+
+VIZ["cohort-grid"] = box => {
+  head(box, "Cohort retention heatmap", "Each row is a cohort: users who signed up in the same week. Each column is weeks since signup. Tap a cell to read it in plain words.");
+  const C = [["Week 1", 120, [120, 66, 48, 41, 38]], ["Week 2", 150, [150, 78, 57, 50]], ["Week 3", 135, [135, 81, 62]], ["Week 4", 160, [160, 104]], ["Week 5", 140, [140]]];
+  const ctrl = ctrlRow(box); const mode = selectBox(ctrl, "cg-m", "Show", [["pct", "% retained"], ["n", "active users"]], "pct");
+  const wrap = el("div", { class: "tbl" }); box.appendChild(wrap); const nt = note(box, "Tap a cell.");
+  const draw = () => {
+    wrap.innerHTML = `<table><tr><th>cohort</th><th class="num">size</th>${[0, 1, 2, 3, 4].map(w => `<th class="num">wk ${w}</th>`).join("")}</tr>${C.map(([c, n, a], r) => `<tr><td>${c}</td><td class="num">${n}</td>${[0, 1, 2, 3, 4].map(w => { const v = a[w]; if (v == null) return '<td></td>'; const p = v / n; return `<td class="num" data-r="${r}" data-w="${w}" style="cursor:pointer;${tint("--sub-sql", Math.round(8 + p * 60))}">${mode.value === "pct" ? Math.round(p * 100) + "%" : v}</td>`; }).join("")}</tr>`).join("")}</table>`;
+    wrap.querySelectorAll("td[data-r]").forEach(td => td.addEventListener("click", () => { const [c, n, a] = C[+td.dataset.r], w = +td.dataset.w; nt.innerHTML = w === 0 ? `${c}: ${n} users signed up. Week 0 is always 100%.` : `Of the <b>${n}</b> users who signed up in ${c}, <b>${a[w]}</b> were active ${w} week${w > 1 ? "s" : ""} later → <b>${Math.round(100 * a[w] / n)}%</b> week-${w} retention.`; }));
+  };
+  mode.addEventListener("change", draw); draw();
+  note(box, "Read down a column to compare cohorts at the same age (is week-1 retention improving?). Read along a row to see one cohort decay. The triangle shape is normal: newer cohorts haven't had time yet.");
+};
+
 /* ================= boot ================= */
 (function () {
   function boot() {

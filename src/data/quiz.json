@@ -802,5 +802,101 @@
   "c": 1,
   "why": "Direct loss on chosen vs rejected pairs.",
   "s": "genai"
+ },
+ {
+  "q": "Which clause runs first?",
+  "o": [
+   "SELECT",
+   "WHERE",
+   "GROUP BY",
+   "ORDER BY"
+  ],
+  "c": 1,
+  "why": "FROM, then WHERE, then GROUP BY, HAVING, SELECT, DISTINCT, ORDER BY, LIMIT.",
+  "s": "sql"
+ },
+ {
+  "q": "Salaries 160, 140, 130, 130, 110. DENSE_RANK of 110?",
+  "o": [
+   "3",
+   "4",
+   "5",
+   "6"
+  ],
+  "c": 1,
+  "why": "DENSE_RANK has no gaps: 1, 2, 3, 3, 4.",
+  "s": "sql"
+ },
+ {
+  "q": "Salaries 160, 140, 130, 130, 110. RANK of 110?",
+  "o": [
+   "3",
+   "4",
+   "5",
+   "6"
+  ],
+  "c": 2,
+  "why": "RANK skips after ties: 1, 2, 3, 3, 5.",
+  "s": "sql"
+ },
+ {
+  "q": "SELECT * FROM t WHERE id NOT IN (1, NULL) returns…",
+  "o": [
+   "All rows except id 1",
+   "No rows",
+   "All rows",
+   "An error"
+  ],
+  "c": 1,
+  "why": "id <> NULL is UNKNOWN for every row, so nothing is TRUE.",
+  "s": "sql"
+ },
+ {
+  "q": "With ORDER BY and no frame, a window's default frame is…",
+  "o": [
+   "The whole partition",
+   "ROWS UNBOUNDED PRECEDING to CURRENT ROW",
+   "RANGE UNBOUNDED PRECEDING to CURRENT ROW",
+   "The current row only"
+  ],
+  "c": 2,
+  "why": "RANGE includes peers (ties), which is why ties share a running total and LAST_VALUE surprises people.",
+  "s": "sql"
+ },
+ {
+  "q": "A condition on the right table of a LEFT JOIN, placed in WHERE, makes it behave like…",
+  "o": [
+   "A FULL JOIN",
+   "An INNER JOIN",
+   "A CROSS JOIN",
+   "Nothing changes"
+  ],
+  "c": 1,
+  "why": "Unmatched rows have NULLs on the right and fail the condition. Put it in ON.",
+  "s": "sql"
+ },
+ {
+  "q": "Best tool for 'users with 3+ consecutive login days' of variable length streaks?",
+  "o": [
+   "GROUP BY date",
+   "date − ROW_NUMBER() island key",
+   "NTILE(3)",
+   "CROSS JOIN"
+  ],
+  "c": 1,
+  "why": "The difference is constant within a consecutive run.",
+  "s": "sql"
+ },
+ {
+  "q": "COUNT(CASE WHEN status='x' THEN 1 ELSE 0 END) counts…",
+  "o": [
+   "Rows with status x",
+   "All rows",
+   "Rows without status x",
+   "Nothing"
+  ],
+  "c": 1,
+  "why": "COUNT counts non-NULLs; 0 isn't NULL. Use SUM or drop ELSE.",
+  "s": "sql"
  }
 ]

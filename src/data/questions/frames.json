@@ -1,0 +1,24 @@
+[
+ {
+  "q": "Write a running total and a 7-day moving average.",
+  "a": "<p>SUM(x) OVER (ORDER BY d ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) and AVG(x) OVER (ORDER BY d ROWS BETWEEN 6 PRECEDING AND CURRENT ROW).</p>"
+ },
+ {
+  "q": "What is the default frame when ORDER BY is used in OVER?",
+  "a": "<p>RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW, which includes all peers (rows with the same ORDER BY value). Tied rows get the same running total. Without ORDER BY, the frame is the whole partition.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "ROWS vs RANGE?",
+  "a": "<p>ROWS counts physical rows; RANGE uses the ORDER BY values (peers, or value offsets like dates). With missing dates, ROWS 6 PRECEDING spans more than 7 calendar days.</p>"
+ },
+ {
+  "q": "Why does LAST_VALUE return the current row?",
+  "a": "<p>The default frame ends at the current row. Use ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING, or FIRST_VALUE with the order reversed.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Moving average only when a full window exists?",
+  "a": "<p>Compute ROW_NUMBER (or COUNT(*) over the same frame) and keep rows where it reaches the window size; the first rows are warm-up with fewer values.</p>"
+ }
+]
