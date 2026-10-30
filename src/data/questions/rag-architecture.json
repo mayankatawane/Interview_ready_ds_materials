@@ -1,0 +1,23 @@
+[
+ {
+  "q": "Walk through a production RAG architecture.",
+  "a": "<p>Gateway (SSO, rate limits) → async orchestrator (history, cache, rewrite) → retrieval service (permission-filtered hybrid search + rerank) → LLM gateway (routing, fallback, cost) → model, streamed back via SSE; guardrails and tracing. Separate ingestion workers fed by a queue; Postgres, Redis, vector index and S3 as stores.</p>"
+ },
+ {
+  "q": "Where does most of a RAG request's latency go?",
+  "a": "<p>LLM generation (output tokens ÷ tokens/s), then any extra LLM calls (rewrite, checks), then reranking. Stream the answer, keep prompts lean, use small models for auxiliary calls, run steps in parallel.</p>"
+ },
+ {
+  "q": "How do you enforce document permissions in RAG?",
+  "a": "<p>Store access groups as chunk metadata and filter inside the retrieval query using the user's SSO identity. Never rely on the LLM to hide content; include scope in cache keys.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "SSE vs WebSockets for chat?",
+  "a": "<p>SSE: one-way server-to-client stream over HTTP, simplest for streaming answers. WebSockets: two-way, for interactive agents (interrupt, approve). Both need async servers and longer proxy timeouts.</p>"
+ },
+ {
+  "q": "Which parts of a RAG system should be separate services?",
+  "a": "<p>Ingestion workers (batch, bursty) and any self-hosted GPU models (embeddings, reranker, LLM). API and orchestration can stay a modular monolith.</p>"
+ }
+]

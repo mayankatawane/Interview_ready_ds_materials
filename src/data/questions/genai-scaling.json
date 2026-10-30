@@ -1,0 +1,23 @@
+[
+ {
+  "q": "How do you scale a GenAI app to 6,000 users?",
+  "a": "<p>Convert to load (peak questions/s, LLM calls, tokens/min, concurrent streams); size API quota across regions with an LLM gateway and fallbacks, or self-hosted vLLM GPUs from load-test throughput; stateless async services; per-user rate limits; routing; caching; gradual rollout.</p>"
+ },
+ {
+  "q": "How many GPUs do you need for N users?",
+  "a": "<p>Users → peak questions/s → LLM calls → input/output tokens/s → divide by measured tokens/s per GPU at your latency target → × headroom (~1.5) → at least 2 for redundancy. The per-GPU number must come from a load test.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Why can one GPU serve many users with vLLM?",
+  "a": "<p>Continuous batching (requests join the running batch every step), PagedAttention (efficient KV-cache memory) and prefix caching; throughput rises with concurrency until memory or latency limits.</p>"
+ },
+ {
+  "q": "What do you do when you hit 429 rate-limit errors at peak?",
+  "a": "<p>Retry with exponential back-off and jitter; spread load across deployments/regions; fallback models via an LLM gateway; per-user rate limits and token budgets; request higher or provisioned quota; route simple questions to smaller models.</p>"
+ },
+ {
+  "q": "Hosted API vs self-hosted LLM?",
+  "a": "<p>API: best quality, fast start, elastic, but quotas, per-token cost and data-residency questions. Self-hosted: control and privacy, cheaper at high steady volume, but you run GPUs, cold starts and ops.</p>"
+ }
+]

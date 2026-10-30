@@ -1,0 +1,24 @@
+[
+ {
+  "q": "How do you deploy a long-running agent in production?",
+  "a": "<p>API creates a run and enqueues it; stateless workers execute the graph and checkpoint state (Postgres) after each step; progress streams via Redis pub/sub and SSE; workers autoscale on queue depth; tools are separate least-privilege services.</p>"
+ },
+ {
+  "q": "Why checkpoint agent state?",
+  "a": "<p>So a run survives worker crashes (resume from the last step instead of repeating tool calls) and can pause for human approval and resume later.</p>"
+ },
+ {
+  "q": "How do you stop an agent repeating a side effect on retry?",
+  "a": "<p>Idempotency keys derived from run ID + step for every write action, and check whether the effect already happened before retrying.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "How do you control agent cost?",
+  "a": "<p>Step limits, per-run token/cost budgets, wall-clock timeouts, loop detection, small models for routing/planning, caching deterministic tool results.</p>"
+ },
+ {
+  "q": "What's the classic silent failure of queue-based agents?",
+  "a": "<p>Requests accepted but never processed because workers are down or stuck. Alert on queue age/backlog and worker health.</p>",
+  "gotcha": true
+ }
+]

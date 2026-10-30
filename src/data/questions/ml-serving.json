@@ -1,0 +1,23 @@
+[
+ {
+  "q": "Batch vs real-time vs streaming inference?",
+  "a": "<p>Batch: scheduled scoring of many rows (daily lists). Real-time: an API scores one request during a user action (loan application). Streaming: per-event scoring on a stream (card transactions). Choose the simplest the decision timing allows.</p>"
+ },
+ {
+  "q": "Shadow vs canary vs blue–green vs A/B?",
+  "a": "<p>Shadow: new model scores a copy of traffic, outputs only logged. Canary: gradually shift a small share of real traffic. Blue–green: switch all traffic between two environments at once, instant rollback. A/B: random split for weeks to measure business impact.</p>"
+ },
+ {
+  "q": "Where does latency usually come from in a real-time scoring API?",
+  "a": "<p>Feature lookups and external calls (credit bureau, other services), not the gradient-boosting model itself (~1 ms). Use an online feature store, timeouts and fallbacks, and log asynchronously.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Why export a model to ONNX?",
+  "a": "<p>Portable, version-stable format with fast inference (ONNX Runtime) callable from Java/C#/C++ services; must verify predictions match the original within tolerance.</p>"
+ },
+ {
+  "q": "What makes a batch scoring job production-grade?",
+  "a": "<p>Idempotent writes per date, model version and reasons stored with scores, validation before publishing (row counts, nulls, PSI vs last run), alerting, and keeping the previous scores if checks fail.</p>"
+ }
+]

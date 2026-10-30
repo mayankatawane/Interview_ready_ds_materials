@@ -1,0 +1,19 @@
+[
+ {
+  "q": "How do you choose which LLM to use?",
+  "a": "<p>Evaluate candidates on your golden set, then weigh latency, cost, context window, compliance (region, self-hosting) and features (tool calling, structured output). Route by task: small models for routing/extraction, large for final answers.</p>"
+ },
+ {
+  "q": "What caches would you use in a GenAI app?",
+  "a": "<p>Exact answer cache, semantic cache, retrieval cache, embedding cache, provider prompt caching for static prefixes, and the KV cache inside the model server.</p>"
+ },
+ {
+  "q": "What is the risk of semantic caching?",
+  "a": "<p>Similar wording with different meaning (this month vs last month) returns a wrong answer; personalised or permission-scoped answers can leak. Use strict thresholds, exclude time-sensitive questions, include permission scope and data version in the key.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "pgvector vs a dedicated vector database?",
+  "a": "<p>pgvector: simplest if you already run Postgres and data is moderate; SQL joins with metadata. Dedicated stores (Pinecone, Qdrant, Milvus) or OpenSearch: scale, hybrid search, advanced filtering and managed operations.</p>"
+ }
+]

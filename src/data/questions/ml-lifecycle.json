@@ -1,0 +1,24 @@
+[
+ {
+  "q": "How would your model be used in production?",
+  "a": "<p>Scheduled data and feature pipelines, a feature store shared by training and serving, a training job tracked in MLflow, a model registry with approval, CI/CD that gates on beating the champion, batch or real-time serving in containers, monitoring and retraining.</p>"
+ },
+ {
+  "q": "What is training–serving skew?",
+  "a": "<p>Features computed differently at serving time than in training (different code, missing-value handling, library versions, or leakage from future data in training). Prevent with shared feature code or a feature store, point-in-time joins and pinned environments.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "What is a feature store and why use one?",
+  "a": "<p>A system that stores features with timestamps and serves them offline (bulk, point-in-time correct for training) and online (low-latency lookups for live scoring), so both use identical feature definitions.</p>"
+ },
+ {
+  "q": "What makes an ML model reproducible?",
+  "a": "<p>Being able to rebuild it from a code commit, data snapshot, parameters and environment (library versions), with an approval record. Git + data versioning (Delta time travel/DVC) + MLflow + Docker.</p>"
+ },
+ {
+  "q": "Offline AUC 0.92, production much worse. First suspects?",
+  "a": "<p>Leakage in training data and training–serving skew, before drift. Compare logged live features with what the offline pipeline computes for the same entities and times.</p>",
+  "gotcha": true
+ }
+]

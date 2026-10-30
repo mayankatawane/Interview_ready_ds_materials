@@ -1,0 +1,19 @@
+[
+ {
+  "q": "How would you deploy a readmission risk model?",
+  "a": "<p>Score inpatients every few hours from EHR data in a secure environment, write scores and top factors back into the clinician's existing patient list, set the threshold by care-team capacity, run in silent mode first, monitor calibration, PPV and equity.</p>"
+ },
+ {
+  "q": "What is silent mode deployment?",
+  "a": "<p>The model runs on live data and stores predictions without showing them, so clinicians can validate performance and tune thresholds before go-live.</p>"
+ },
+ {
+  "q": "Why can a successful clinical model look worse over time?",
+  "a": "<p>Interventions on flagged patients prevent the outcome, so those patients look like false positives. Record interventions and account for them in evaluation.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "What is alert fatigue and how do you avoid it?",
+  "a": "<p>Clinicians ignore frequent, low-value alerts. Flag only as many patients as the team can act on, show reasons, integrate into existing screens, avoid interruptive pop-ups.</p>"
+ }
+]

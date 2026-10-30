@@ -1,0 +1,15 @@
+[
+ {
+  "q": "Design a GenAI copilot for 5,000 sales reps.",
+  "a": "<p>Clarify question mix, permissions and latency; estimate tokens/min; LangGraph agent behind SSO and a gateway; router to text-to-SQL over a governed semantic layer with row-level security and hybrid RAG over approved content (parallel when both needed); LLM gateway; Postgres/Redis; guardrails; golden-set CI; staged rollout.</p>"
+ },
+ {
+  "q": "How do you make sure numbers in LLM answers are correct?",
+  "a": "<p>The LLM never computes from memory: SQL computes over a semantic layer with defined metrics, the LLM explains. Validate SQL, show definitions, and test with a golden set of question→result pairs.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "How would you roll out a GenAI copilot?",
+  "a": "<p>Pilot with a small group and collect feedback, grow the eval set from real questions, load test at ~2× expected peak, expand by business unit while watching quality, latency, cost and adoption.</p>"
+ }
+]

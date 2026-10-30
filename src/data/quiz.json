@@ -898,5 +898,101 @@
   "c": 1,
   "why": "COUNT counts non-NULLs; 0 isn't NULL. Use SUM or drop ELSE.",
   "s": "sql"
+ },
+ {
+  "q": "2 requests/s arrive, each takes 5 s. About how many are in progress?",
+  "o": [
+   "2.5",
+   "5",
+   "10",
+   "25"
+  ],
+  "c": 2,
+  "why": "Little's law: concurrency = arrival rate × time = 2 × 5.",
+  "s": "sysdesign"
+ },
+ {
+  "q": "A churn list used by the retention team every Monday should be served by…",
+  "o": [
+   "Streaming",
+   "A real-time API",
+   "Weekly/nightly batch scoring",
+   "Edge devices"
+  ],
+  "c": 2,
+  "why": "The decision is made on a schedule, so batch is simplest and cheapest.",
+  "s": "sysdesign"
+ },
+ {
+  "q": "New model scores every request but users only see the old model's output. That's…",
+  "o": [
+   "Canary",
+   "Shadow",
+   "Blue–green",
+   "A/B test"
+  ],
+  "c": 1,
+  "why": "Shadow mode: zero user risk, paired comparison on live traffic.",
+  "s": "sysdesign"
+ },
+ {
+  "q": "PSI of 0.31 on a key feature suggests…",
+  "o": [
+   "No change",
+   "Minor change",
+   "A significant shift to investigate",
+   "The model is perfect"
+  ],
+  "c": 2,
+  "why": "Rule of thumb: above 0.25 is a major shift; check the pipeline, then recalibrate or retrain.",
+  "s": "sysdesign"
+ },
+ {
+  "q": "Best autoscaling signal for a vLLM server?",
+  "o": [
+   "CPU utilisation",
+   "Disk usage",
+   "Queue length / time to first token",
+   "Number of nodes"
+  ],
+  "c": 2,
+  "why": "The GPU does the work; scale on what users feel.",
+  "s": "sysdesign"
+ },
+ {
+  "q": "A semantic cache served last month's numbers for 'sales this month'. The fix?",
+  "o": [
+   "Lower the similarity threshold",
+   "Exclude time-sensitive questions and key by data version",
+   "Remove the vector DB",
+   "Use a bigger LLM"
+  ],
+  "c": 1,
+  "why": "Similar wording can mean different things; scope and version the cache.",
+  "s": "sysdesign"
+ },
+ {
+  "q": "Fraud threshold should mainly be set by…",
+  "o": [
+   "Maximising accuracy",
+   "Maximising F1 on a notebook",
+   "Investigator capacity and error costs",
+   "Using 0.5"
+  ],
+  "c": 2,
+  "why": "Flag the top k the SIU can review; measure precision/recall at k.",
+  "s": "sysdesign"
+ },
+ {
+  "q": "Agent run crashed after sending an email; the retry must not resend it. Use…",
+  "o": [
+   "A bigger timeout",
+   "Idempotency keys",
+   "More replicas",
+   "Higher temperature"
+  ],
+  "c": 1,
+  "why": "Idempotency keys make retries safe for side effects.",
+  "s": "sysdesign"
  }
 ]

@@ -1,0 +1,19 @@
+[
+ {
+  "q": "Design a claims fraud detection system.",
+  "a": "<p>Score claims at FNOL via an API and re-score nightly as documents arrive; features from a feature store (history, network, timing, amounts, text); XGBoost with class weights, time-split validation and calibration; capacity-based threshold to an SIU queue with SHAP reasons; outcomes as labels with random audits; monitor drift, hit rate and fairness.</p>"
+ },
+ {
+  "q": "How do you choose the fraud threshold?",
+  "a": "<p>From investigator capacity and costs, not F1: if SIU reviews 150 claims/week out of 14,000, flag the top ~1.1% and measure precision/recall in that top k.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Why is accuracy useless for fraud?",
+  "a": "<p>With 1–2% fraud, predicting 'no fraud' for everything is 98–99% accurate. Use PR-AUC and precision/recall at the operating point.</p>"
+ },
+ {
+  "q": "What label problems exist in fraud data?",
+  "a": "<p>Labels arrive late, only investigated claims are labelled (selection bias), and 'not proven' isn't 'genuine'. Use random audits and careful handling of unlabelled claims.</p>"
+ }
+]

@@ -1811,6 +1811,319 @@ VIZ["cohort-grid"] = box => {
   note(box, "Read down a column to compare cohorts at the same age (is week-1 retention improving?). Read along a row to see one cohort decay. The triangle shape is normal: newer cohorts haven't had time yet.");
 };
 
+
+/* ================= System design ================= */
+function archExplorer(box, title, desc, lanes, info, start) {
+  head(box, title, desc);
+  lanes.forEach(([lt, items]) => {
+    const w = el("div", { style: "margin:8px 0" }); w.appendChild(el("div", { class: "eyebrow" }, lt));
+    const r = el("div", { style: "display:flex;flex-wrap:wrap;gap:6px;align-items:center" });
+    items.forEach(([k, t], i) => { r.appendChild(el("button", { type: "button", class: "btn", "data-k": k, style: "border-color:var(--sub-sys);color:var(--sub-sys)" }, t)); if (i < items.length - 1) r.appendChild(el("span", { style: "color:var(--muted)" }, "→")); });
+    w.appendChild(r); box.appendChild(w);
+  });
+  const d = el("div", { class: "worked", "aria-live": "polite", style: "margin-top:10px" }); box.appendChild(d);
+  const row = (k, v) => v ? `<p style="margin:.35em 0"><strong>${k}:</strong> ${v}</p>` : "";
+  box.addEventListener("click", e => {
+    const b = e.target.closest("[data-k]"); if (!b) return;
+    $$("[data-k]", box).forEach(x => { const on = x === b; x.style.background = on ? "var(--sub-sys)" : "transparent"; x.style.color = on ? "var(--surface)" : "var(--sub-sys)"; });
+    const i = info[b.dataset.k];
+    d.innerHTML = `<b>${b.textContent}</b>${row("What it does", i.what)}${row("Think of it as", i.like)}${row("Typical tech", i.tech)}${row("How it scales", i.scale)}${row("What goes wrong", i.fail)}`;
+  });
+  $(`[data-k=${start}]`, box).click();
+}
+function journey(box, title, desc, steps) {
+  head(box, title, desc);
+  const bar = el("div", { style: "display:flex;height:14px;border-radius:7px;overflow:hidden;border:1px solid var(--line);margin:8px 0" }); box.appendChild(bar);
+  const ctrl = ctrlRow(box); const bp = button(ctrl, "← Back"), bn = button(ctrl, "Next step →", "btn solid");
+  const card = el("div", { class: "worked", "aria-live": "polite" }); box.appendChild(card);
+  const st = statsRow(box);
+  const total = steps.reduce((s, x) => s + x[3], 0);
+  let k = 0;
+  const draw = () => {
+    bar.innerHTML = steps.map((s, i) => `<div title="${s[0]}" style="flex:${Math.max(s[3], total * 0.012)};background:var(${i <= k ? PCOL[i % 5] : "--line"});opacity:${i === k ? 1 : i < k ? .55 : .5}"></div>`).join("");
+    const s = steps[k];
+    card.innerHTML = `<span class="eyebrow" style="color:var(${PCOL[k % 5]})">Step ${k + 1} of ${steps.length} · ${s[0]}</span><p style="margin:.4em 0">${s[1]}</p>${s[2] ? `<p style="margin:.4em 0;color:var(--muted)"><em>Analogy:</em> ${s[2]}</p>` : ""}`;
+    const so = steps.slice(0, k + 1).reduce((a, x) => a + x[3], 0);
+    setStats(st, [["This step", s[3] + " ms"], ["Elapsed so far", so.toLocaleString("en-US") + " ms"], ["Whole journey", total.toLocaleString("en-US") + " ms"]]);
+    bp.disabled = k === 0; bn.disabled = k === steps.length - 1;
+  };
+  bn.addEventListener("click", () => { k = Math.min(steps.length - 1, k + 1); draw(); }); bp.addEventListener("click", () => { k = Math.max(0, k - 1); draw(); }); draw();
+}
+function numIn(ctrl, id, label, val, step, w = "6.5em") { const lab = el("label", { for: id }); lab.appendChild(document.createTextNode(label + " ")); const i = el("input", { type: "number", id, value: val, step, min: 0, style: `width:${w};font:inherit;padding:3px 6px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)` }); lab.appendChild(i); ctrl.appendChild(lab); return i; }
+const fmt = (v, d = 0) => (+v).toLocaleString("en-US", { maximumFractionDigits: d, minimumFractionDigits: 0 });
+
+VIZ["qps-calc"] = box => {
+  head(box, "Back-of-envelope: users → traffic", "Interviewers love a quick estimate. Change the inputs; every number below is explained in words.");
+  const c1 = ctrlRow(box);
+  const U = numIn(c1, "q-u", "Registered users", 6000, 500), A = numIn(c1, "q-a", "% active per day", 40, 5, "4.5em"), R = numIn(c1, "q-r", "Requests per active user per day", 10, 1, "4.5em");
+  const c2 = ctrlRow(box);
+  const P = numIn(c2, "q-p", "% of the day's traffic in the busiest hour", 20, 1, "4.5em"), L = numIn(c2, "q-l", "Seconds per request", 4, 0.5, "4.5em");
+  const st = statsRow(box); const ex = el("div", { class: "worked", style: "margin-top:10px" }); box.appendChild(ex);
+  const draw = () => {
+    const dau = +U.value * +A.value / 100, daily = dau * +R.value, avg = daily / 86400, peak = daily * +P.value / 100 / 3600, conc = peak * +L.value;
+    setStats(st, [["Requests / day", fmt(daily)], ["Average per second", fmt(avg, 2)], ["Peak per second", fmt(peak, 2)], ["In flight at peak", fmt(Math.ceil(conc))]]);
+    ex.innerHTML = `<p style="margin:.3em 0">${fmt(U.value)} users × ${A.value}% active = <strong>${fmt(dau)}</strong> daily active users, each making ${R.value} requests = <strong>${fmt(daily)}</strong> requests a day.</p><p style="margin:.3em 0">Averaged over 86,400 seconds that's only ${fmt(avg, 2)} per second, but traffic isn't flat: ${P.value}% of it lands in one hour → <strong>${fmt(peak, 2)} requests/second at peak</strong>. Design for the peak, not the average.</p><p style="margin:.3em 0">Little's law: requests in flight = arrival rate × time each takes = ${fmt(peak, 2)} × ${L.value} s ≈ <strong>${fmt(Math.ceil(conc))} concurrent requests</strong>. That's what your servers, connection pools and LLM rate limits must handle at once.</p>`;
+  };
+  [U, A, R, P, L].forEach(i => i.addEventListener("input", draw)); draw();
+};
+
+VIZ["journey-basic"] = box => journey(box, "Follow one request through the system", "A field rep opens the app and asks for a doctor's risk score. Step through each component. The bar shows where the time goes (illustrative numbers).", [
+  ["Client (app / browser)", "The phone app sends an HTTPS request: <code>GET /score?hcp=123</code> with the user's login token.", "A customer walks into a restaurant and places an order.", 5],
+  ["DNS + CDN", "DNS turns the domain name into an IP address. A CDN serves static files (app code, images) from a server near the user, so they don't travel to your data centre.", "Google Maps finding the restaurant's address; the takeaway counter at the entrance hands out menus instantly.", 20],
+  ["Load balancer", "Spreads incoming requests across several identical copies of your service and stops sending traffic to any copy that fails its health check.", "The host at the door who sends each guest to a free waiter.", 2],
+  ["API gateway", "One front door for all services: checks the login token (authentication), applies rate limits, routes /score to the scoring service, logs the call.", "The manager who checks your reservation and tells you which section to sit in.", 8],
+  ["Service (stateless)", "Your code (e.g. FastAPI in a container). Stateless = it keeps nothing in memory between requests, so any copy can serve any request, and you can add copies freely.", "A waiter. Any waiter can take any order because the order is written on the ticket, not in the waiter's head.", 10],
+  ["Cache (Redis)", "Checks if this answer was computed recently. A hit returns in ~1 ms and skips everything below. Here: a miss.", "The chef's counter of ready-made popular dishes.", 1],
+  ["Database / feature store", "Fetches the doctor's latest features (prescriptions, visits) by key. Indexed lookups take a few milliseconds.", "The pantry with labelled shelves.", 12],
+  ["Model inference", "Loads the features into the model (already in memory) and predicts. An XGBoost model takes about a millisecond; a large LLM takes seconds.", "The chef cooking the dish.", 15],
+  ["Queue (async side work)", "The service drops a message on a queue (Kafka/SQS) for logging and monitoring, without waiting for it, so the user isn't slowed down.", "Putting the dirty plates on the conveyor to the kitchen instead of washing them before serving.", 2],
+  ["Response", "The score and its top reasons return through the gateway to the app. The result is also written to the cache for next time.", "The dish arrives at the table.", 5]
+]);
+
+VIZ["journey-agent"] = box => journey(box, "One agent request at scale", "A user asks the copilot: “Which oncology brands grew fastest last quarter and why?” Follow it through a production agent platform (illustrative timings).", [
+  ["Client → gateway", "The web app opens a streaming connection (SSE or WebSocket) and sends the question with the user's token. The gateway authenticates, applies a per-user rate limit and attaches the user's permissions.", "Checking in at reception with your ID badge.", 40],
+  ["API service", "A stateless FastAPI service creates a run ID and thread ID, stores the request in Postgres, puts a job on the queue and immediately tells the client “accepted, run 8f2…”. The HTTP request isn't held open while the agent works.", "A token number at a bank counter: you don't stand at the window while they process.", 30],
+  ["Queue → worker", "A worker pod picks up the job, loads the conversation state from the checkpointer (Postgres) and starts the LangGraph graph. More jobs waiting → the autoscaler (KEDA) adds workers.", "The next free clerk calls your token number.", 120],
+  ["Router / planner (LLM)", "A small, fast model classifies the question and plans: SQL for the numbers, document search for the reasons. Its partial output streams to the user via Redis pub/sub → SSE.", "The clerk reads your request and decides which departments to ask.", 900],
+  ["Tool: SQL", "The SQL tool (text-to-SQL, read-only role, row-level security, 10 s timeout) queries the warehouse. The result is summarised before it goes back into the prompt.", "Asking the accounts department for the figures.", 1800],
+  ["Tool: retrieval", "Hybrid search + reranker over field notes, filtered by the user's region permissions.", "Asking the records room for relevant notes.", 600],
+  ["Checkpoint", "After each step the graph state is saved. If the pod crashes, another worker resumes from here instead of starting over (and repeating tool calls).", "The clerk writes progress on your file so a colleague can pick it up.", 20],
+  ["Answer (large LLM)", "The main model writes the answer with citations, streaming tokens to the user as they're generated. Users see text after ~1 s even though the full answer takes several seconds.", "The clerk explaining the answer to you, sentence by sentence.", 4000],
+  ["Guardrails + logging", "Output checks (PII, citations valid), then the trace (every step, tokens, cost, latency) goes to LangSmith/Langfuse; metrics to Prometheus.", "The supervisor's quick check and the record in the register.", 150]
+]);
+
+VIZ["autoscale-sim"] = box => {
+  head(box, "Autoscaling over a working day", "Traffic (requests/sec) to a model API from 6 am to midnight. Each pod handles a fixed load. The autoscaler adds pods when load per pod exceeds the target, but new pods take a few minutes to start. Red = overloaded (slow or failing requests).");
+  const ctrl = ctrlRow(box);
+  const cap = slider(ctrl, "as-c", "Requests/sec one pod can handle", 5, 40, 1, 20, v => v);
+  const tgt = slider(ctrl, "as-t", "Target utilisation", 0.4, 0.95, 0.05, 0.6, v => Math.round(v * 100) + "%");
+  const ctrl2 = ctrlRow(box);
+  const mn = slider(ctrl2, "as-m", "Min pods", 1, 10, 1, 2, v => v);
+  const lag = slider(ctrl2, "as-l", "Start-up delay (min)", 1, 15, 1, 4, v => v);
+  const cv = addCanvas(box, 230, "Traffic, capacity and pods over the day"); const st = statsRow(box);
+  legend(box, [["--k6", "traffic"], ["--sub-sys", "capacity (pods × per-pod limit)"], ["--bad", "overloaded"]]);
+  const T = []; for (let m = 0; m <= 18 * 60; m += 5) { const h = 6 + m / 60; const v = 8 + 140 * Math.exp(-((h - 11) ** 2) / 3.5) + 110 * Math.exp(-((h - 15.5) ** 2) / 4) + (h > 13 && h < 13.6 ? 120 : 0); T.push([m, v]); }
+  onDraw(() => {
+    const { x, w, h } = prep(cv), pad = { l: 34, r: 10, t: 12, b: 22 };
+    const c = +cap.value, tg = +tgt.value, mnp = +mn.value, lg = +lag.value;
+    let pods = mnp, pending = []; const P = [];
+    T.forEach(([m, v]) => { pending = pending.filter(p => { if (p[0] <= m) { pods = Math.max(pods, p[1]); return false; } return true; }); const want = Math.max(mnp, Math.ceil(v / (c * tg))); if (want > pods && !pending.some(p => p[1] >= want)) pending.push([m + lg, want]); if (want < pods) pods = Math.max(want, pods - 1); P.push(pods); });
+    const mx = Math.max(...T.map(t => t[1]), ...P.map(p => p * c)) * 1.08;
+    const X = lin(0, 18 * 60, pad.l, w - pad.r), Y = lin(0, mx, h - pad.b, pad.t);
+    frame(x, w, h, pad);
+    let over = 0;
+    T.forEach(([m, v], i) => { if (v > P[i] * c) { over += 5; x.fillStyle = css("--bad-soft"); x.fillRect(X(m) - 2, pad.t, 4.5, h - pad.t - pad.b); } });
+    x.strokeStyle = css("--sub-sys"); x.lineWidth = 2; x.beginPath(); T.forEach(([m], i) => { const y = Y(P[i] * c); if (i) { x.lineTo(X(m), Y(P[i - 1] * c)); x.lineTo(X(m), y); } else x.moveTo(X(m), y); }); x.stroke();
+    x.strokeStyle = css("--k6"); x.lineWidth = 2; x.beginPath(); T.forEach(([m, v], i) => i ? x.lineTo(X(m), Y(v)) : x.moveTo(X(m), Y(v))); x.stroke();
+    [6, 9, 12, 15, 18, 21, 24].forEach(hh => text(x, (hh % 24) + ":00", X((hh - 6) * 60), h - 6, css("--muted"), "center"));
+    text(x, fmt(mx) + " rps", 2, pad.t + 8);
+    const podHours = P.reduce((s, p) => s + p * 5 / 60, 0);
+    setStats(st, [["Max pods", Math.max(...P)], ["Pod-hours (cost)", fmt(podHours)], ["Overloaded", over + " min"]]);
+  });
+  [cap, tgt, mn, lag].forEach(s => s.addEventListener("input", () => ACTIVE.forEach(f => f())));
+  note(box, "Try: lower the target utilisation (more headroom) or raise min pods to absorb the 1 pm spike, and watch cost (pod-hours) rise. That trade-off is the whole autoscaling conversation.");
+};
+
+VIZ["ml-arch"] = box => archExplorer(box, "An ML system, piece by piece", "Tap any box. The model itself is one small box; most of the system is data plumbing and safety nets.", [
+  ["Data and features", [["src", "Source systems"], ["etl", "Pipelines (ETL)"], ["fs", "Feature store"]]],
+  ["Training", [["train", "Training pipeline"], ["track", "Experiment tracking"], ["reg", "Model registry"]]],
+  ["Serving", [["ci", "CI/CD"], ["serve", "Model service"], ["app", "Business app"]]],
+  ["Watching", [["mon", "Monitoring"], ["fb", "Labels & feedback"], ["retrain", "Retraining"]]]
+], {
+  src: { what: "Where raw data lives: policy and claims systems, core banking, EHR, CRM, event streams.", like: "The farms that supply the restaurant.", tech: "OLTP databases (Oracle, Postgres), Kafka streams, files in S3/ADLS.", fail: "Schema changes upstream silently break features; late or missing data." },
+  etl: { what: "Scheduled jobs that clean, join and aggregate raw data into tables and features.", like: "Washing and chopping vegetables before service.", tech: "Spark / Databricks, dbt, Airflow or Databricks Workflows for scheduling.", scale: "Distributed compute (Spark) and incremental processing.", fail: "Data leakage (using information from after the prediction time), duplicates, silent nulls. Add data-quality checks (Great Expectations, dbt tests)." },
+  fs: { what: "One place that stores features with timestamps and serves them two ways: in bulk for training (offline) and by key in milliseconds for live predictions (online).", like: "A pantry where every ingredient has a label and a date, used both for practice cooking and real service.", tech: "Databricks Feature Store, Feast, SageMaker Feature Store; online store in Redis/DynamoDB.", scale: "Offline: Delta/Parquet tables. Online: key-value store.", fail: "Training–serving skew: the feature is computed one way in training and another way live. Point-in-time joins prevent leakage." },
+  train: { what: "Code that pulls a training snapshot, trains (e.g. XGBoost), tunes, evaluates on a time-based holdout, and checks fairness and calibration.", tech: "Python, scikit-learn/XGBoost, Spark ML; runs as a job, not a notebook.", fail: "Not reproducible: unpinned data, code or library versions." },
+  track: { what: "Records every run: data version, parameters, metrics, plots, the model file.", like: "A lab notebook that writes itself.", tech: "MLflow (built into Databricks), Weights & Biases, SageMaker Experiments.", fail: "Without it, nobody can say which model is in production or how it was built." },
+  reg: { what: "Stores approved model versions with stages or aliases (staging, champion, challenger, archived) and who approved them.", like: "The menu board: only approved dishes go on it.", tech: "MLflow Model Registry / Unity Catalog, SageMaker Model Registry.", fail: "Manual file copies of model.pkl; no approval trail (a big problem in banking and healthcare)." },
+  ci: { what: "Automated tests and deployment: unit tests, data tests, a model quality gate (must beat the champion), build a container, deploy to staging then production.", tech: "GitHub Actions / GitLab CI / Azure DevOps, Docker, Terraform, Argo CD.", fail: "Deploying by hand from a laptop; no rollback path." },
+  serve: { what: "Makes predictions available: a nightly batch job writing scores to a table, or a REST API answering in milliseconds.", like: "The kitchen pass where finished dishes go out.", tech: "Batch: Spark job. Real-time: FastAPI/BentoML in Docker on Kubernetes, SageMaker / Databricks Model Serving.", scale: "Stateless replicas behind a load balancer, autoscaling.", fail: "Latency spikes from slow feature lookups; the model loaded on every request instead of once at start-up." },
+  app: { what: "Where the prediction is used: a claims triage queue, a loan decision engine, an EHR alert, a CRM next-best-action.", tech: "Business rules engine + UI; the model score is one input to a decision.", fail: "Nobody acts on the score. Adoption and workflow fit decide the value, not AUC." },
+  mon: { what: "Watches service health (latency, errors), data drift (PSI), prediction drift, and model performance once labels arrive.", like: "The smoke alarm and the customer feedback cards.", tech: "Prometheus + Grafana, Evidently, WhyLabs, SageMaker Model Monitor, Databricks Lakehouse Monitoring.", fail: "Only monitoring uptime: the API is 'healthy' while predictions have quietly gone wrong." },
+  fb: { what: "Collects the true outcomes (was the claim fraud? did the loan default?) and joins them to past predictions.", tech: "Outcome tables joined on prediction ID and timestamp.", fail: "Labels arrive months later, and only for cases you acted on (selection bias)." },
+  retrain: { what: "Rebuilds the model on fresh data on a schedule or when monitoring triggers it, then sends it back through validation and approval.", tech: "Scheduled pipeline (monthly/quarterly) + drift-triggered runs; champion–challenger comparison.", fail: "Auto-deploying a retrained model without checks; retraining on data that your own model influenced (feedback loops)." }
+}, "fs");
+
+VIZ["deploy-strategies"] = box => {
+  head(box, "Releasing a new model safely", "You have model v1 in production and a new v2. Pick a strategy and how much traffic v2 gets. Turn on “v2 has a hidden problem” to see how many of 10,000 daily users would be affected before you notice.");
+  const ctrl = ctrlRow(box);
+  const s = selectBox(ctrl, "ds-s", "Strategy", [["shadow", "Shadow"], ["canary", "Canary"], ["bg", "Blue–green"], ["ab", "A/B test"]], "canary");
+  const p = slider(ctrl, "ds-p", "Traffic to v2", 0, 100, 5, 5, v => v + "%");
+  const bug = checkbox(ctrl, "ds-b", "v2 has a hidden problem", false);
+  const vis = el("div", { style: "display:grid;grid-template-columns:auto 1fr;gap:8px 10px;align-items:center;margin:10px 0" }); box.appendChild(vis);
+  const st = statsRow(box); const d = el("div", { class: "worked", style: "margin-top:8px" }); box.appendChild(d);
+  const info = {
+    shadow: ["v2 receives a <strong>copy</strong> of real requests and its predictions are logged, but users only ever see v1's answer.", "Zero user risk; compare v1 and v2 on identical live traffic. Costs double compute.", "First step for any risky model: credit scoring, fraud, clinical."],
+    canary: ["A small share of real users (1% → 5% → 25% → 100%) gets v2. Watch errors, latency and business metrics at each step.", "Limits the blast radius; automatic rollback if metrics breach thresholds.", "Default for most model and service updates."],
+    bg: ["Two full environments: blue (v1) and green (v2). Test green, then flip the router so 100% goes to green at once. Keep blue running to flip back.", "Instant switch and instant rollback; needs double infrastructure for a while.", "When you can't mix versions (e.g. a database schema change) or need a clean cut-over."],
+    ab: ["Users are randomly split (e.g. 50/50) for weeks, and a business metric (conversion, loss rate) is compared with a statistical test.", "Measures real business impact, not just model metrics. Slow, and half of users get the worse version during the test.", "When the question is “does v2 make more money / save more?”"]
+  };
+  const draw = () => {
+    const k = s.value; let share = k === "shadow" ? 0 : k === "bg" ? (+p.value >= 50 ? 100 : 0) : +p.value;
+    p.disabled = k === "shadow";
+    const bars = [["v1 (current)", 100 - share, "--k6"], ["v2 (new)", share, "--sub-sys"]];
+    vis.innerHTML = bars.map(([n, v, c]) => `<span style="font:.8rem var(--f-mono)">${n}</span><div style="background:var(--line);border-radius:6px;height:18px;position:relative"><div style="width:${v}%;height:100%;border-radius:6px;background:var(${c})"></div><span style="position:absolute;right:6px;top:0;font:.72rem/18px var(--f-mono)">${v}%${k === "shadow" && n.startsWith("v2") ? " served · 100% mirrored" : ""}</span></div>`).join("");
+    const hit = bug.checked ? Math.round(10000 * share / 100) : 0;
+    setStats(st, [["Users served by v2 / day", fmt(10000 * share / 100)], ["Affected if v2 is bad", bug.checked ? fmt(hit) : "–"], ["Rollback", { shadow: "nothing to roll back", canary: "route back to v1 (seconds)", bg: "flip router (seconds)", ab: "end the test" }[k]]]);
+    d.innerHTML = `<p style="margin:.3em 0">${info[k][0]}</p><p style="margin:.3em 0"><strong>Trade-off:</strong> ${info[k][1]}</p><p style="margin:.3em 0"><strong>Use when:</strong> ${info[k][2]}</p>${k === "bg" ? '<p class="sqlmeta">Blue–green is all or nothing: below 50% the router stays on blue, from 50% it flips to green.</p>' : ""}`;
+  };
+  s.addEventListener("change", draw); p.addEventListener("input", draw); bug.addEventListener("change", draw); draw();
+};
+
+VIZ["psi-calc"] = box => {
+  head(box, "Drift detector: Population Stability Index", "Grey bars: how a feature (e.g. applicant income) was distributed in training. Coloured bars: this month's live data. Shift it and watch PSI.");
+  const ctrl = ctrlRow(box);
+  const sh = slider(ctrl, "ps-s", "Shift the live data", -1.5, 1.5, 0.1, 0.3, v => (v > 0 ? "+" : "") + v.toFixed(1) + " sd");
+  const sp = slider(ctrl, "ps-w", "Spread", 0.6, 1.6, 0.1, 1, v => "× " + v.toFixed(1));
+  const cv = addCanvas(box, 200, "Training versus live distribution by bin"); const st = statsRow(box); const nt = note(box, "");
+  const cdf = z => 0.5 * (1 + Math.tanh(0.7978845608 * (z + 0.044715 * z ** 3)));
+  const edges = [-Infinity, -1.6, -1.1, -0.65, -0.3, 0, 0.3, 0.65, 1.1, 1.6, Infinity];
+  onDraw(() => {
+    const { x, w, h } = prep(cv), pad = { l: 10, r: 10, t: 10, b: 20 };
+    const E = edges.slice(1).map((e, i) => cdf(e) - cdf(edges[i]));
+    const A = edges.slice(1).map((e, i) => Math.max(1e-4, cdf((e - +sh.value) / +sp.value) - cdf((edges[i] - +sh.value) / +sp.value)));
+    const terms = E.map((e, i) => (A[i] - e) * Math.log(A[i] / e)), psi = terms.reduce((a, b) => a + b, 0);
+    const mx = Math.max(...E, ...A) * 1.1, bw = (w - pad.l - pad.r) / 10, Y = lin(0, mx, h - pad.b, pad.t);
+    const col = psi < 0.1 ? css("--good") : psi < 0.25 ? css("--c2") : css("--bad");
+    E.forEach((e, i) => { const x0 = pad.l + i * bw; x.fillStyle = css("--line"); x.fillRect(x0 + bw * 0.1, Y(e), bw * 0.38, h - pad.b - Y(e)); x.fillStyle = col; x.fillRect(x0 + bw * 0.52, Y(A[i]), bw * 0.38, h - pad.b - Y(A[i])); text(x, "B" + (i + 1), x0 + bw / 2, h - 5, css("--muted"), "center"); });
+    const top = terms.map((t, i) => [t, i]).sort((a, b) => b[0] - a[0])[0];
+    setStats(st, [["PSI", psi.toFixed(3)], ["Status", psi < 0.1 ? "Stable" : psi < 0.25 ? "Investigate" : "Major shift"], ["Biggest contributor", `bin B${top[1] + 1} (${top[0].toFixed(3)})`]]);
+    nt.innerHTML = `PSI = Σ (live% − train%) × ln(live% / train%) over the bins. Rules of thumb: <b style="color:var(--good)">&lt; 0.10 stable</b>, <b style="color:var(--c2)">0.10–0.25 investigate</b>, <b style="color:var(--bad)">&gt; 0.25 significant shift</b> → check the data pipeline first, then consider recalibrating or retraining.`;
+  });
+  [sh, sp].forEach(s => s.addEventListener("input", () => ACTIVE.forEach(f => f())));
+};
+
+VIZ["rag-arch"] = box => archExplorer(box, "Production RAG: the services", "Tap a box to see its job, typical tech, how it scales and how it breaks. The arrows show the online query path; ingestion runs separately.", [
+  ["Front door", [["ui", "Chat UI"], ["gw", "API gateway"]]],
+  ["Query path", [["orch", "Orchestrator"], ["ret", "Retrieval service"], ["llmgw", "LLM gateway"], ["llm", "LLM"]]],
+  ["Shared stores", [["cache", "Redis cache"], ["vdb", "Vector + keyword index"], ["pg", "Postgres"], ["s3", "Object storage"]]],
+  ["Offline + safety", [["ingest", "Ingestion workers"], ["guard", "Guardrails"], ["obs", "Observability & eval"]]]
+], {
+  ui: { what: "Web/mobile chat. Streams tokens as they arrive (Server-Sent Events or WebSocket), shows citations and thumbs up/down.", tech: "React/Next.js, Streamlit for internal pilots.", fail: "No streaming → users stare at a spinner for 8 seconds and think it's broken." },
+  gw: { what: "Single entry point: SSO login (OAuth/OIDC), per-user and per-team rate limits, request size limits, routing to services.", like: "Security desk at the building entrance.", tech: "Kong, AWS API Gateway, NGINX/Envoy ingress, Azure APIM.", scale: "Horizontally; it's stateless.", fail: "No per-user limits → one script floods the LLM quota for everyone." },
+  orch: { what: "The brain of each request: loads chat history, rewrites the question, calls retrieval, builds the prompt, calls the LLM, runs checks. For agents, this is the LangGraph graph.", tech: "Python FastAPI + LangGraph/LangChain/LlamaIndex, async I/O.", scale: "Stateless pods behind a load balancer; state lives in Postgres/Redis. It mostly waits on network calls, so async code serves many requests per pod.", fail: "Synchronous blocking calls → a few slow LLM calls exhaust all workers." },
+  ret: { what: "Embeds the query, runs hybrid search (vector + BM25) with permission filters, reranks, returns top chunks with metadata.", tech: "Embedding model (API or TEI on GPU), cross-encoder reranker, FastAPI.", scale: "Embedding and reranker on GPU or CPU pods scaled on queue depth; can be its own microservice because it scales differently from the orchestrator.", fail: "Permission filter applied after retrieval → leaks or empty results; reranker becomes the latency bottleneck." },
+  llmgw: { what: "One internal API in front of all models: routing (small vs large), fallbacks between providers, retries with back-off, token counting per team, caching, key management.", like: "A switchboard operator who knows which expert is free and how much each call costs.", tech: "LiteLLM, Portkey, Azure APIM, a custom proxy.", fail: "Every service calls the provider directly → no cost control, no fallback when a provider rate-limits you." },
+  llm: { what: "Generates the answer. Either a hosted API or a self-hosted open model.", tech: "API: Azure OpenAI, Bedrock (Claude), Vertex (Gemini). Self-hosted: vLLM or TGI serving Llama/Mistral/Qwen on GPU nodes.", scale: "API: quota (tokens per minute) and multiple deployments/regions. Self-hosted: more GPU replicas, autoscaled on queue length or time-to-first-token.", fail: "Hitting the tokens-per-minute quota at peak → 429 errors. Plan quota for peak, not average." },
+  cache: { what: "Short-lived data: exact and semantic answer cache, retrieval results, sessions, rate-limit counters, pub/sub for streaming.", tech: "Redis / ElastiCache / Azure Cache for Redis.", fail: "Caching answers without the user's permission scope → one user sees another's restricted data." },
+  vdb: { what: "Stores chunk vectors and text with metadata; answers similarity + keyword queries.", tech: "OpenSearch/Elasticsearch (hybrid in one place), pgvector, Qdrant, Pinecone, Weaviate, Databricks Vector Search.", scale: "Replicas for read throughput, shards for size; HNSW index in memory.", fail: "Index not updated when documents change; deleted documents still answer questions." },
+  pg: { what: "Durable records: users, conversations, feedback, document metadata, agent checkpoints, audit log.", tech: "PostgreSQL (RDS/Aurora/Azure Database).", scale: "Read replicas, connection pooling (PgBouncer).", fail: "Too many connections from autoscaled pods; no pooling." },
+  s3: { what: "Raw documents and parsed versions; the source of truth for re-indexing.", tech: "S3, ADLS, GCS.", fail: "No versioning → can't reproduce what the bot knew on a given day." },
+  ingest: { what: "Event-driven pipeline: a document lands → queue → workers parse, chunk, embed, upsert into the index; deletes propagate.", like: "The back-office team filing new documents into the library every night.", tech: "S3 events/SQS or Kafka, Celery/Argo/Databricks jobs, Unstructured or Azure Document Intelligence for parsing.", scale: "Batch embeddings on GPU workers; scale workers on queue depth.", fail: "Re-embedding everything on every change; no idempotency → duplicate chunks." },
+  guard: { what: "Input checks (prompt injection, PII), output checks (toxicity, PII, citation validity), topic restrictions.", tech: "Llama Guard, NeMo Guardrails, Presidio for PII, provider moderation.", fail: "Guardrails add latency if run in sequence; run cheap checks in parallel with generation where possible." },
+  obs: { what: "Traces each request (prompt, chunks, tool calls, tokens, cost, latency), dashboards, alerts, offline eval runs on a golden set, user feedback analysis.", tech: "LangSmith, Langfuse, Arize Phoenix, OpenTelemetry → Grafana/Datadog.", fail: "No traces → can't tell whether a bad answer was retrieval or generation." }
+}, "orch");
+
+VIZ["latency-budget"] = box => {
+  head(box, "Where do the seconds go?", "A single RAG answer, step by step. Adjust the slow parts and see total time vs the time until the user sees the first word.");
+  const ctrl = ctrlRow(box);
+  const rw = checkbox(ctrl, "lb-rw", "Query rewrite with an LLM", true);
+  const rr = checkbox(ctrl, "lb-rr", "Cross-encoder rerank", true);
+  const sm = checkbox(ctrl, "lb-st", "Stream the answer", true);
+  const ctrl2 = ctrlRow(box);
+  const ot = slider(ctrl2, "lb-o", "Answer length (tokens)", 100, 1000, 50, 400, v => v);
+  const tps = slider(ctrl2, "lb-t", "Generation speed (tokens/s)", 20, 150, 10, 60, v => v);
+  const bar = el("div", { style: "display:flex;height:26px;border-radius:7px;overflow:hidden;margin:10px 0 4px;border:1px solid var(--line)" }); box.appendChild(bar);
+  const lg = el("div", { class: "legend" }); box.appendChild(lg); const st = statsRow(box);
+  const draw = () => {
+    const S = [["Gateway + auth", 30, "--muted"], ["Rewrite (small LLM)", rw.checked ? 450 : 0, "--k5"], ["Embed query", 40, "--k6"], ["Hybrid search", 70, "--k3"], ["Rerank", rr.checked ? 180 : 0, "--k4"], ["Build prompt", 15, "--muted"], ["LLM first token", 700, "--c2"], ["LLM rest of answer", Math.round(+ot.value / +tps.value * 1000), "--sub-sys"], ["Output checks", 120, "--good"]].filter(s => s[1] > 0);
+    const total = S.reduce((a, s) => a + s[1], 0), first = S.slice(0, S.findIndex(s => s[0] === "LLM first token") + 1).reduce((a, s) => a + s[1], 0);
+    bar.innerHTML = S.map(s => `<div title="${s[0]}: ${s[1]} ms" style="flex:${s[1]};background:var(${s[2]})"></div>`).join("");
+    lg.innerHTML = S.map(s => `<span><i style="background:var(${s[2]})"></i>${s[0]} ${s[1]} ms</span>`).join("");
+    setStats(st, [["Total", (total / 1000).toFixed(1) + " s"], ["User sees first words after", ((sm.checked ? first : total) / 1000).toFixed(1) + " s"], ["Biggest chunk", S.reduce((a, b) => b[1] > a[1] ? b : a)[0]]]);
+  };
+  [rw, rr, sm].forEach(c => c.addEventListener("change", draw)); [ot, tps].forEach(s => s.addEventListener("input", draw)); draw();
+  note(box, "Generation dominates, so: stream, keep answers concise, use a faster model for rewriting (or skip it for clear questions), and run output checks on chunks while streaming.");
+};
+
+VIZ["genai-capacity"] = box => {
+  head(box, "Capacity planner: GenAI app for thousands of users", "Estimate peak load for an LLM app, and what it means for API quotas or self-hosted GPUs. All inputs are assumptions you can change; the per-GPU throughput must be measured for your model with a load test.");
+  const c1 = ctrlRow(box);
+  const U = numIn(c1, "gc-u", "Users", 6000, 500), PA = numIn(c1, "gc-pa", "% using it in the peak hour", 20, 5, "4.5em"), QH = numIn(c1, "gc-q", "Questions per user in that hour", 4, 1, "4.5em");
+  const c2 = ctrlRow(box);
+  const CALLS = numIn(c2, "gc-c", "LLM calls per question", 3, 1, "4.5em"), IT = numIn(c2, "gc-i", "Input tokens per call", 2500, 250), OT = numIn(c2, "gc-o", "Output tokens per call", 300, 50), LAT = numIn(c2, "gc-l", "Seconds per question", 8, 1, "4.5em");
+  const c3 = ctrlRow(box);
+  const GT = numIn(c3, "gc-g", "Output tokens/s one GPU sustains (measure!)", 1500, 100), HR = numIn(c3, "gc-h", "Headroom ×", 1.5, 0.1, "4.5em");
+  const st = statsRow(box); const ex = el("div", { class: "worked", style: "margin-top:10px" }); box.appendChild(ex);
+  const draw = () => {
+    const active = +U.value * +PA.value / 100, qph = active * +QH.value, qps = qph / 3600, calls = qps * +CALLS.value, conc = qps * +LAT.value;
+    const itpm = calls * 60 * +IT.value, otpm = calls * 60 * +OT.value, otps = calls * +OT.value, gpus = Math.max(1, Math.ceil(otps * +HR.value / +GT.value));
+    setStats(st, [["Peak questions/s", fmt(qps, 2)], ["Questions in flight", fmt(Math.ceil(conc))], ["Input tokens/min", fmt(itpm)], ["Output tokens/min", fmt(otpm)], ["GPUs (self-host)", gpus]]);
+    ex.innerHTML = `<p style="margin:.3em 0">${fmt(active)} people active in the busiest hour × ${QH.value} questions = <strong>${fmt(qph)} questions/hour ≈ ${fmt(qps, 2)}/s</strong>. Each needs ${CALLS.value} LLM calls (rewrite, answer, check…) = ${fmt(calls, 1)} calls/s.</p><p style="margin:.3em 0"><strong>API route:</strong> your quota must cover about <strong>${fmt(itpm)} input + ${fmt(otpm)} output tokens per minute</strong> at peak (plus headroom), or you'll get 429 rate-limit errors. Ask for quota in more than one region/deployment and put a fallback model behind the LLM gateway.</p><p style="margin:.3em 0"><strong>Self-host route:</strong> the cluster must generate ${fmt(otps)} output tokens/s. At ${fmt(GT.value)} tokens/s per GPU with ×${HR.value} headroom → <strong>${gpus} GPU${gpus > 1 ? "s" : ""}</strong> for the main model (minimum 2 for redundancy), plus separate capacity for embeddings and the reranker. Prefill of long prompts also costs GPU time, so validate with a load test (k6, Locust, vLLM's benchmark script).</p><p style="margin:.3em 0">Little's law: ${fmt(qps, 2)}/s × ${LAT.value} s ≈ <strong>${fmt(Math.ceil(conc))} questions in progress at once</strong>, which sizes your async workers, connection pools and streaming connections.</p>`;
+  };
+  [U, PA, QH, CALLS, IT, OT, LAT, GT, HR].forEach(i => i.addEventListener("input", draw)); draw();
+};
+
+VIZ["cache-layers"] = box => {
+  head(box, "Caching layers in a GenAI app", "Requests fall through the caches from top to bottom. Change the hit rates and see the average latency and cost per 1,000 questions (illustrative costs).");
+  const ctrl = ctrlRow(box);
+  const h1 = slider(ctrl, "cl-1", "Exact answer cache hit", 0, 0.5, 0.05, 0.1, v => Math.round(v * 100) + "%");
+  const h2 = slider(ctrl, "cl-2", "Semantic cache hit", 0, 0.5, 0.05, 0.15, v => Math.round(v * 100) + "%");
+  const ctrl2 = ctrlRow(box);
+  const h3 = slider(ctrl2, "cl-3", "Retrieval cache hit", 0, 0.8, 0.05, 0.3, v => Math.round(v * 100) + "%");
+  const h4 = checkbox(ctrl2, "cl-4", "Provider prompt caching (static system prompt)", true);
+  const flow = el("div", { style: "display:grid;gap:6px;margin:10px 0" }); box.appendChild(flow); const st = statsRow(box);
+  const draw = () => {
+    const a = +h1.value, b = +h2.value, r = +h3.value;
+    const pExact = a, pSem = (1 - a) * b, pFull = (1 - a) * (1 - b);
+    const retMs = r * 5 + (1 - r) * 250, llmMs = h4.checked ? 3400 : 3800, llmCost = h4.checked ? 0.0105 : 0.0135;
+    const lat = pExact * 5 + pSem * 45 + pFull * (45 + retMs + llmMs), cost = 1000 * (pSem * 0.00002 + pFull * (0.00002 + llmCost));
+    const rows = [["1 · Exact cache (Redis key = normalised question + user scope)", pExact, "5 ms, $0"], ["2 · Semantic cache (embed question, find a near-identical past question)", pSem, "≈45 ms, tiny embedding cost"], ["3 · Full pipeline (retrieval " + (r ? Math.round(r * 100) + "% cached" : "uncached") + ", then LLM" + (h4.checked ? " with prompt cache" : "") + ")", pFull, `≈${fmt(45 + retMs + llmMs)} ms, ≈$${llmCost.toFixed(4)}`]];
+    flow.innerHTML = rows.map(([t, p, c], i) => `<div style="display:grid;grid-template-columns:1fr auto;gap:4px;align-items:center"><span style="font-size:.84rem">${t}<br><span class="sqlmeta">${c}</span></span><strong style="font-family:var(--f-mono)">${Math.round(p * 100)}%</strong><div style="grid-column:1/-1;height:8px;border-radius:4px;background:var(--line)"><div style="width:${p * 100}%;height:100%;border-radius:4px;background:var(${["--good", "--k6", "--sub-sys"][i]})"></div></div></div>`).join("");
+    setStats(st, [["Avg latency", (lat / 1000).toFixed(2) + " s"], ["Cost / 1,000 questions", "$" + cost.toFixed(2)], ["Questions reaching the LLM", Math.round(pFull * 100) + "%"]]);
+  };
+  [h1, h2, h3].forEach(s => s.addEventListener("input", draw)); h4.addEventListener("change", draw); draw();
+  note(box, "Inside the model server there's one more cache, the KV cache, which vLLM manages automatically (and can reuse for shared prompt prefixes). Every answer cache must be invalidated when the underlying documents change, and keyed by the user's permission scope.");
+};
+
+VIZ["arch-insurance"] = box => archExplorer(box, "Insurance claims fraud: the deployed system", "Tap each part. Flow: a claim is filed → features → score → triage → investigators → outcomes feed back.", [
+  ["Claim comes in", [["fnol", "Claim filed (FNOL)"], ["feat", "Feature build"], ["score", "Fraud model"]]],
+  ["Decision", [["rules", "Rules + thresholds"], ["triage", "Triage queue"], ["siu", "Investigators (SIU)"]]],
+  ["Learning loop", [["label", "Outcomes"], ["monitor", "Monitoring"], ["gov", "Governance"]]]
+], {
+  fnol: { what: "First Notice of Loss: the customer reports a claim (app, call centre, garage). The claims system creates a claim record and publishes a 'claim created' event.", tech: "Guidewire / in-house claims system, Kafka or SQS event.", fail: "Key fields arrive later (repair estimate, police report), so the first score has less information." },
+  feat: { what: "Builds ~100–300 features: claim amount vs policy sum, days since policy start, number of past claims, garage/hospital history, claimant–garage network links, text signals from the claim description.", like: "The detective's checklist of red flags.", tech: "Spark/Databricks batch features + online feature store for the latest values; graph features (shared phone numbers, addresses) from a graph database.", fail: "Leakage: using fields only known after investigation (e.g. 'claim rejected') in training." },
+  score: { what: "XGBoost/LightGBM model outputs a fraud probability and the top SHAP reasons. Scored at claim creation (real-time API, < 200 ms) and re-scored nightly in batch as new documents arrive.", tech: "MLflow model in a FastAPI container on Kubernetes or SageMaker endpoint; nightly Spark batch job.", fail: "Only 1–2% of claims are fraud: optimise PR-AUC and precision at the top, not accuracy." },
+  rules: { what: "Combines the score with business rules (e.g. very large claims always reviewed; tiny claims fast-tracked). The threshold is set by investigator capacity: if SIU can review 150 claims a week, flag the top 150 by score.", tech: "Decision engine / rules in the claims system.", fail: "A threshold chosen by F1 on a notebook instead of by capacity and cost of fraud vs cost of investigation." },
+  triage: { what: "Low-risk claims are fast-tracked for straight-through payment (good customer experience); medium go to normal handling; high go to the investigation queue with reason codes.", like: "A hospital triage desk: urgent, standard, fast lane.", fail: "Too many false alarms → investigators ignore the queue (alert fatigue)." },
+  siu: { what: "Special Investigation Unit reviews flagged claims using the reasons shown (e.g. 'policy started 9 days before loss', 'garage linked to 14 prior claims'). Humans make the final decision.", fail: "No explanation shown → investigators can't trust or use the score." },
+  label: { what: "Investigation outcomes (confirmed fraud / genuine) become labels, often months later. Unflagged claims are rarely investigated, so labels are biased towards what the model already flags.", tech: "Outcome tables joined to scoring logs by claim ID.", fail: "Training only on investigated claims → the model learns its own blind spots. Send a small random sample of unflagged claims for review." },
+  monitor: { what: "Weekly: flag rate, score distribution and feature PSI; monthly: hit rate (share of flagged claims confirmed as fraud), money saved, fast-track error rate.", tech: "Evidently/Lakehouse Monitoring dashboards, alerts in Teams/Slack.", fail: "Fraudsters adapt (concept drift); a new product line changes the data." },
+  gov: { what: "Model documentation, bias checks across protected groups and regions, explanation for every flag, audit trail of versions and approvals; regulators (e.g. IRDAI in India) and internal audit can ask why a claim was delayed.", tech: "Model registry approvals, SHAP reason codes stored with each score, fairness reports.", fail: "Using features that act as proxies for protected attributes (e.g. pincode → community)." }
+}, "score");
+
+VIZ["arch-credit"] = box => archExplorer(box, "Bank: real-time credit decisions", "A loan application gets a decision in seconds. Tap each part.", [
+  ["Application", [["apply", "Application"], ["bureau", "Bureau + internal data"], ["fs2", "Feature service"]]],
+  ["Decision (< 1 s)", [["model2", "Scorecard / XGBoost"], ["engine", "Decision engine"], ["explain", "Reason codes"]]],
+  ["Control", [["champ", "Champion–challenger"], ["mon2", "Monitoring (PSI, AUC)"], ["mrm", "Model risk management"]]]
+], {
+  apply: { what: "Customer applies in the app or branch: income, employment, loan amount, consent to fetch credit data.", fail: "Self-reported income is noisy; verify via bank statements or account aggregator data." },
+  bureau: { what: "Fetches the credit bureau report (CIBIL/Experian score, past loans, delinquencies) and internal data (salary credits, existing products).", tech: "Bureau API calls with timeouts and caching; core banking data from the warehouse.", fail: "Bureau API slow or down → need a timeout and a fallback path (manual review)." },
+  fs2: { what: "Computes the exact same features as in training (debt-to-income, utilisation, months since last delinquency) from the fetched data.", tech: "Shared feature code (same library in training and serving), online feature store.", fail: "Training–serving skew: a feature computed slightly differently live silently shifts every score." },
+  model2: { what: "A probability of default (PD) model. Often logistic regression scorecards (very explainable) or monotonic-constrained XGBoost.", tech: "Model in a container/endpoint; p99 latency target well under 100 ms.", fail: "Non-monotonic effects (higher income → higher risk in one range) are hard to defend to regulators; use monotonic constraints." },
+  engine: { what: "Turns PD into a decision with policy rules: approve / decline / refer to underwriter, plus the loan limit and interest rate (risk-based pricing). The model doesn't decide alone.", like: "The credit committee's rulebook applied automatically.", tech: "Decision engines (FICO Blaze, Experian PowerCurve, in-house rules service).", fail: "Rules and model maintained by different teams drift apart." },
+  explain: { what: "The top factors behind a decline are turned into plain reason codes ('high credit utilisation', 'recent missed payment'). Regulations in many countries require telling customers why they were declined.", tech: "Scorecard points or SHAP values mapped to approved reason texts.", fail: "SHAP on correlated features gives unstable reasons; validate reason codes with compliance." },
+  champ: { what: "The new model runs in shadow (scores every application, decides nothing) for a period, then on a small share of traffic; promoted only if better on discrimination (AUC/Gini), calibration and business KPIs.", fail: "Comparing on the old model's approved population only (reject inference problem: you never see outcomes for declined applicants)." },
+  mon2: { what: "Monthly PSI on the score and on key features (CSI), approval rate, early delinquency (e.g. 30+ days past due at 3 months), AUC/Gini once outcomes mature (12+ months), calibration by score band.", fail: "Outcomes take a year; rely on early-warning indicators and input drift in the meantime." },
+  mrm: { what: "Model risk management (US SR 11-7; similar RBI and EU expectations): an independent team validates the model before use and periodically; model inventory, documentation, limitations, approvals and annual reviews.", tech: "Model inventory, validation reports, registry with approval states.", fail: "Shipping a model without independent validation — in a bank, this is a regulatory finding." }
+}, "engine");
+
+VIZ["arch-health"] = box => archExplorer(box, "Hospital: readmission risk in the clinical workflow", "Predict which inpatients are likely to be readmitted within 30 days, so care managers can intervene. Tap each part.", [
+  ["Data", [["ehr", "EHR data"], ["etl3", "Clinical data pipeline"], ["phi", "PHI security"]]],
+  ["Prediction", [["batch3", "Scoring every few hours"], ["model3", "Risk model"], ["silent", "Silent mode trial"]]],
+  ["Action", [["ui3", "Score in the EHR"], ["care", "Care manager workflow"], ["mon3", "Monitoring & equity"]]]
+], {
+  ehr: { what: "Electronic Health Record: diagnoses, labs, vitals, medications, prior admissions, length of stay, discharge plans.", tech: "Epic, Cerner/Oracle Health; HL7 v2 messages and FHIR APIs; nightly reporting databases (e.g. Epic Clarity).", fail: "Data entered late (diagnosis codes often finalised after discharge) → the live model sees less than the training data did." },
+  etl3: { what: "Pulls and cleans clinical data, maps codes (ICD-10, LOINC), builds features such as number of admissions in the last 6 months, abnormal labs, comorbidity scores.", tech: "Spark/Databricks or SQL pipelines inside the hospital's network or a compliant cloud.", fail: "Training on discharge-time data but scoring during the stay (leakage of information that isn't known yet)." },
+  phi: { what: "Protected Health Information must stay protected: encryption, access control, audit logs, minimum necessary data, de-identification for model development.", tech: "Private cloud/on-prem, VPCs, HIPAA (US) or DPDP Act (India) controls, BAAs with vendors.", fail: "Sending PHI to an external API without agreements; logging patient data in plain text." },
+  batch3: { what: "Scores all current inpatients every few hours (or nightly) rather than per click: decisions are made over days, so real-time isn't needed.", tech: "Scheduled job writes scores back into the EHR via an integration (FHIR/HL7 or vendor ML platform).", fail: "Over-engineering a real-time API for a decision made once a day." },
+  model3: { what: "Gradient boosting or logistic regression on structured EHR features; calibrated probabilities so '30%' really means about 30%.", fail: "Good AUC but poorly calibrated → wrong number of patients flagged; check calibration per hospital site." },
+  silent: { what: "Before go-live, the model runs in silent mode for weeks: scores are stored but not shown. Clinicians compare predictions with what actually happened, and thresholds are tuned.", like: "A new doctor shadowing a senior before treating patients alone.", fail: "Skipping it → alert fatigue or mistrust from day one." },
+  ui3: { what: "A risk flag or column in the patient list (e.g. high / medium / low) with the top contributing factors, inside the screens clinicians already use.", fail: "A separate dashboard nobody opens. Integration into the existing workflow decides adoption." },
+  care: { what: "High-risk patients get interventions: medication reconciliation, follow-up appointment booked before discharge, a phone call in 48 hours. The threshold matches how many patients the care team can actually handle.", fail: "Flagging 40% of patients when the team can follow up with 10%." },
+  mon3: { what: "Track drift (case mix changes, new coding practices, events like COVID), calibration, PPV at the threshold, intervention rates, and performance across age, gender, ethnicity and insurance type.", tech: "Monthly reports reviewed by a clinical AI governance committee.", fail: "Measuring success by AUC instead of readmission rates; ignoring that interventions change outcomes (the model's success makes its labels look wrong)." }
+}, "silent");
+
 /* ================= boot ================= */
 (function () {
   function boot() {

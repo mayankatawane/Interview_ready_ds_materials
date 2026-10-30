@@ -1,0 +1,23 @@
+[
+ {
+  "q": "How is a credit model used to make loan decisions?",
+  "a": "<p>The PD model scores the application from bureau and internal features; a decision engine applies policy rules, cut-offs, affordability and pricing; reason codes are generated for declines; everything is logged for audit.</p>"
+ },
+ {
+  "q": "Why are scorecards or monotonic XGBoost common in banking?",
+  "a": "<p>Explainability and defensibility: every decline needs reasons, models must pass independent validation, and monotonic constraints keep relationships logical (more missed payments never lowers risk).</p>",
+  "gotcha": true
+ },
+ {
+  "q": "What is reject inference?",
+  "a": "<p>You only observe repayment for approved applicants, so training data is biased; reject inference tries to estimate how declined applicants would have performed.</p>"
+ },
+ {
+  "q": "How is card fraud detection different from loan scoring?",
+  "a": "<p>It's per transaction on a stream with a tens-of-milliseconds budget: streaming velocity features (Kafka + Flink), an in-memory online store, a light model, step-up authentication for borderline cases, and a rules fallback.</p>"
+ },
+ {
+  "q": "What is SR 11-7?",
+  "a": "<p>US Federal Reserve guidance on model risk management: model inventory, documentation, independent validation, ongoing monitoring and governance. Similar expectations exist from the RBI and EU regulators.</p>"
+ }
+]

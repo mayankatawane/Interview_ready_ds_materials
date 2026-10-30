@@ -1,0 +1,28 @@
+[
+ {
+  "q": "What would you monitor for a deployed model?",
+  "a": "<p>Service health (latency, errors), data quality (nulls, ranges, schema), drift (PSI on features and score, flag rate), and model/business performance once labels arrive (AUC, precision at threshold, calibration, business KPIs).</p>"
+ },
+ {
+  "q": "Data drift vs concept drift?",
+  "a": "<p>Data drift: the input distribution P(X) changes. Concept drift: the relationship P(y|X) changes (fraudsters adapt). Data drift is visible immediately; concept drift needs labels or proxies.</p>"
+ },
+ {
+  "q": "Compute PSI for train shares 30/40/30% vs live 20/40/40%.",
+  "a": "<p>(0.2−0.3)ln(0.2/0.3) + 0 + (0.4−0.3)ln(0.4/0.3) = 0.0405 + 0.0288 ≈ 0.069 → stable (&lt; 0.1). 0.1–0.25 investigate; &gt; 0.25 significant shift.</p>"
+ },
+ {
+  "q": "How do you monitor performance when labels take months?",
+  "a": "<p>Leading indicators (feature and score drift, flag rates, early outcomes), proxy labels, and cohort-based performance by scoring month as labels mature.</p>"
+ },
+ {
+  "q": "What is a feedback loop in a deployed model?",
+  "a": "<p>The model's decisions shape the future training data (only flagged claims get investigated and labelled), reinforcing blind spots. Mitigate with random audits of unflagged cases and logging which cases were acted on.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Should a retrained model be deployed automatically?",
+  "a": "<p>Not blindly. It should pass validation, data checks and a champion–challenger comparison, with approval in regulated settings.</p>",
+  "gotcha": true
+ }
+]

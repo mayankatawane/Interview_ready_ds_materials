@@ -1,0 +1,27 @@
+[
+ {
+  "q": "Image vs container?",
+  "a": "<p>An image is the built, read-only package (code + dependencies + start command). A container is a running instance of an image; many containers can run from one image.</p>"
+ },
+ {
+  "q": "What goes into a Dockerfile for a model API?",
+  "a": "<p>A slim Python base, pinned requirements (same versions as training), the app code and model artefact, the exposed port and a start command (e.g. uvicorn). Load the model once at start-up; keep secrets out of the image.</p>"
+ },
+ {
+  "q": "Explain pod, deployment, service and HPA.",
+  "a": "<p>Pod: one or more containers running together. Deployment: keeps N identical pods running and does rolling updates. Service: stable address and load balancing to those pods. HPA: changes the number of pods based on a metric.</p>"
+ },
+ {
+  "q": "Why not autoscale an LLM server on CPU?",
+  "a": "<p>The work happens on the GPU; CPU can look idle while requests queue. Scale on queue length, requests in flight or time to first token (e.g. with KEDA).</p>",
+  "gotcha": true
+ },
+ {
+  "q": "Why keep at least 2 replicas?",
+  "a": "<p>Availability: if one pod or node fails (or during a rolling update), the other keeps serving.</p>"
+ },
+ {
+  "q": "What are readiness and liveness probes?",
+  "a": "<p>Readiness: is the pod ready to receive traffic (model loaded)? Liveness: is it still healthy, or should it be restarted? Without readiness probes, traffic hits pods still loading the model.</p>"
+ }
+]

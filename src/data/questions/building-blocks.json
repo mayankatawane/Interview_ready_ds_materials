@@ -1,0 +1,28 @@
+[
+ {
+  "q": "What does a load balancer do vs an API gateway?",
+  "a": "<p>A load balancer spreads traffic across identical instances and skips unhealthy ones. An API gateway is the front door: authentication, rate limiting, routing to different services, logging. Often both are used.</p>"
+ },
+ {
+  "q": "Why should services be stateless?",
+  "a": "<p>So any instance can serve any request: you can add instances to scale, and a crash loses nothing. Sessions, history and agent state live in Redis or a database.</p>"
+ },
+ {
+  "q": "Monolith or microservices?",
+  "a": "<p>Start with a modular monolith for speed and simplicity; split out components with different scaling or hardware needs (GPU model serving, ingestion workers) or separate team ownership. Microservices add network latency and operational complexity.</p>",
+  "gotcha": true
+ },
+ {
+  "q": "When would you use a queue?",
+  "a": "<p>For slow, bursty or non-urgent work the user shouldn't wait for: document ingestion, batch scoring, long agent runs, notifications. Queues absorb spikes and decouple producers from workers.</p>"
+ },
+ {
+  "q": "What's a circuit breaker?",
+  "a": "<p>After repeated failures from a dependency, stop calling it for a while and use a fallback (cache, simpler model, friendly error), then test it again. Prevents cascading failures and wasted time on timeouts.</p>"
+ },
+ {
+  "q": "What does idempotent mean and why does it matter?",
+  "a": "<p>Doing an operation twice has the same effect as once. Retries are only safe for idempotent operations; for side effects (payments, emails) use idempotency keys.</p>",
+  "gotcha": true
+ }
+]
